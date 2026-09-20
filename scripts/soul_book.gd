@@ -72,6 +72,10 @@ func _ready() -> void:
 	page_number = _label(contents, Rect2(880, 784, 320, 40), 20)
 	page_number.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
 	animation = _texture(stage, turn_frames[0], Rect2(0, -270, 1536, 1536))
+	var page_turn_material := ShaderMaterial.new()
+	page_turn_material.shader = preload("res://shaders/book_page_turn.gdshader")
+	page_turn_material.set_shader_parameter("base_frame", turn_frames[0])
+	animation.material = page_turn_material
 	animation.hide()
 	previous = _button("← Назад", Rect2(285, 890, 225, 52), turn.bind(-1))
 	next = _button("Дальше →", Rect2(1020, 890, 225, 52), turn.bind(1))
