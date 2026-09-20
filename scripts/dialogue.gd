@@ -355,3 +355,6 @@ func _unhandled_input(event: InputEvent) -> void:
 	elif not choosing and event is InputEventMouseButton and event.pressed and event.button_index == MOUSE_BUTTON_LEFT:
 		advance()
 		get_viewport().set_input_as_handled()
+	elif not choosing and event is InputEventScreenTouch and event.pressed:
+		advance()
+		get_viewport().set_input_as_handled()

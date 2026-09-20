@@ -201,7 +201,13 @@ func _unhandled_input(event: InputEvent) -> void:
 		get_viewport().set_input_as_handled()
 	elif event is InputEventMouseButton and event.pressed:
 		if event.button_index == MOUSE_BUTTON_LEFT:
-			var point: Vector2 = stage.get_global_transform().affine_inverse() * event.position
-			if Rect2(140, 90, 1260, 750).has_point(point):
-				turn(1 if point.x >= 768 else -1)
+			_turn_from_screen_position(event.position)
 		get_viewport().set_input_as_handled()
+	elif event is InputEventScreenTouch and event.pressed:
+		_turn_from_screen_position(event.position)
+		get_viewport().set_input_as_handled()
+
+func _turn_from_screen_position(screen_position: Vector2) -> void:
+	var point: Vector2 = stage.get_global_transform().affine_inverse() * screen_position
+	if Rect2(140, 90, 1260, 750).has_point(point):
+		turn(1 if point.x >= 768 else -1)

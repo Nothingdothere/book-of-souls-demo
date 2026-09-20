@@ -17,6 +17,7 @@ var quest_unlocked := false
 var book_seen := false
 var quest_label: Label
 var book_hint: Label
+var mobile_controls: CanvasLayer
 
 func _ready() -> void:
 	dialogue.conversation_started.connect(_conversation_started)
@@ -28,6 +29,11 @@ func _ready() -> void:
 	add_child(book)
 	book.opened.connect(_book_opened)
 	book.closed.connect(_book_closed)
+	mobile_controls = CanvasLayer.new()
+	mobile_controls.name = "MobileControls"
+	mobile_controls.set_script(preload("res://scripts/mobile_controls.gd"))
+	add_child(mobile_controls)
+	controls.visible = not mobile_controls.mobile_enabled
 	quest_label = _hud_label(Vector2(26, 60), 18)
 	quest_label.text = "◇ Поговорить с Касом"
 	book_hint = _hud_label(Vector2(26, 92), 17)
@@ -101,11 +107,13 @@ func _conversation_started() -> void:
 	if target == kas:
 		kas.set_conversing(true, player.global_position.x)
 	controls.hide()
+	mobile_controls.set_gameplay_visible(false)
 
 func _conversation_finished() -> void:
 	player.controls_locked = false
 	kas.set_conversing(false)
-	controls.show()
+	controls.visible = not mobile_controls.mobile_enabled
+	mobile_controls.set_gameplay_visible(true)
 	quest_label.show()
 	if dialogue.lina_resolved:
 		quest_label.text = "✓ Судьба Лины решена"
@@ -136,12 +144,14 @@ func _book_opened() -> void:
 	player.velocity.x = 0
 	player.artwork.play("idle")
 	controls.hide()
+	mobile_controls.set_gameplay_visible(false)
 	quest_label.hide()
 	book_hint.hide()
 
 func _book_closed() -> void:
 	player.controls_locked = false
-	controls.show()
+	controls.visible = not mobile_controls.mobile_enabled
+	mobile_controls.set_gameplay_visible(true)
 	quest_label.show()
 	book_hint.text = "J — книга душ"
 	book_hint.show()
