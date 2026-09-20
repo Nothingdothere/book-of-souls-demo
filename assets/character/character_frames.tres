@@ -1,0 +1,79 @@
+[gd_resource type="SpriteFrames" format=3 uid="uid://c0glg8s43gblp"]
+
+[ext_resource type="Texture2D" uid="uid://djq6ibw8p6u7d" path="res://assets/character/dark_walk_right_01.png" id="1"]
+[ext_resource type="Texture2D" uid="uid://dmq58c4ngsk87" path="res://assets/character/dark_walk_right_03.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://1uhkgfeyb7uh" path="res://assets/character/dark_walk_right_04.png" id="3"]
+[ext_resource type="Texture2D" uid="uid://d3pf61b450b6c" path="res://assets/character/dark_walk_right_05.png" id="4"]
+[ext_resource type="Texture2D" uid="uid://c41mltyjhvkqh" path="res://assets/character/dark_walk_right_06.png" id="5"]
+[ext_resource type="Texture2D" uid="uid://mkal5s5tvj7j" path="res://assets/character/dark_walk_right_07.png" id="6"]
+[ext_resource type="Texture2D" uid="uid://crgb6oreypb1w" path="res://assets/character/dark_walk_right_08.png" id="7"]
+[ext_resource type="Texture2D" uid="uid://cwdge70kluyat" path="res://assets/character/dark_walk_right_09.png" id="8"]
+[ext_resource type="Texture2D" uid="uid://c8cgmxwee3t6k" path="res://assets/character/dark_idle_right_01.png" id="idle_1"]
+[ext_resource type="Texture2D" uid="uid://67i48xoiv37w" path="res://assets/character/dark_idle_right_02.png" id="idle_2"]
+[ext_resource type="Texture2D" uid="uid://di7giy0f8mce0" path="res://assets/character/dark_idle_right_03.png" id="idle_3"]
+[ext_resource type="Texture2D" uid="uid://ik51ef1cpy5b" path="res://assets/character/dark_idle_right_04.png" id="idle_4"]
+[ext_resource type="Texture2D" uid="uid://qbfhsngt00uf" path="res://assets/character/dark_idle_right_05.png" id="idle_5"]
+[ext_resource type="Texture2D" uid="uid://vnow01anrws8" path="res://assets/character/dark_idle_right_06.png" id="idle_6"]
+[ext_resource type="Texture2D" uid="uid://gwcnwtxdt6o7" path="res://assets/character/dark_idle_right_07.png" id="idle_7"]
+[ext_resource type="Texture2D" uid="uid://dxoy173ieoqhn" path="res://assets/character/dark_idle_right_08.png" id="idle_8"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("idle_1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("idle_2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("idle_3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("idle_4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("idle_5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("idle_6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("idle_7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("idle_8")
+}],
+"loop": 1,
+"name": &"idle",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("8")
+}],
+"loop": 1,
+"name": &"walk",
+"speed": 8.0
+}]

@@ -1,0 +1,79 @@
+[gd_resource type="SpriteFrames" format=3 uid="uid://dlrlweli1ns7r"]
+
+[ext_resource type="Texture2D" uid="uid://twygwmtp11sq" path="res://assets/npc/kas/conversation/kas_idle_front_01.png" id="conversation_1"]
+[ext_resource type="Texture2D" uid="uid://btnt3062v7mq4" path="res://assets/npc/kas/conversation/kas_idle_front_02.png" id="conversation_2"]
+[ext_resource type="Texture2D" uid="uid://xap5eu5vlr0g" path="res://assets/npc/kas/conversation/kas_idle_front_03.png" id="conversation_3"]
+[ext_resource type="Texture2D" uid="uid://dhptfarurxj1y" path="res://assets/npc/kas/conversation/kas_idle_front_04.png" id="conversation_4"]
+[ext_resource type="Texture2D" uid="uid://d0xay1gqsfibv" path="res://assets/npc/kas/conversation/kas_idle_front_05.png" id="conversation_5"]
+[ext_resource type="Texture2D" uid="uid://c216dfda7adbj" path="res://assets/npc/kas/conversation/kas_idle_front_06.png" id="conversation_6"]
+[ext_resource type="Texture2D" uid="uid://gwsh7cc8qewp" path="res://assets/npc/kas/conversation/kas_idle_front_07.png" id="conversation_7"]
+[ext_resource type="Texture2D" uid="uid://b3337g7py45b6" path="res://assets/npc/kas/conversation/kas_idle_front_08.png" id="conversation_8"]
+[ext_resource type="Texture2D" uid="uid://dfgh4awx0rxhl" path="res://assets/npc/kas/idle/kas_idle_right_01.png" id="idle_1"]
+[ext_resource type="Texture2D" uid="uid://dl0xahtmrbvm8" path="res://assets/npc/kas/idle/kas_idle_right_02.png" id="idle_2"]
+[ext_resource type="Texture2D" uid="uid://bsxy66euhc3jn" path="res://assets/npc/kas/idle/kas_idle_right_03.png" id="idle_3"]
+[ext_resource type="Texture2D" uid="uid://bpgxufswiao1v" path="res://assets/npc/kas/idle/kas_idle_right_04.png" id="idle_4"]
+[ext_resource type="Texture2D" uid="uid://ca7l6exjcibtn" path="res://assets/npc/kas/idle/kas_idle_right_05.png" id="idle_5"]
+[ext_resource type="Texture2D" uid="uid://dfhowgq2ygcpq" path="res://assets/npc/kas/idle/kas_idle_right_06.png" id="idle_6"]
+[ext_resource type="Texture2D" uid="uid://bbth7ac1nw2tr" path="res://assets/npc/kas/idle/kas_idle_right_07.png" id="idle_7"]
+[ext_resource type="Texture2D" uid="uid://drjbyayy08bb8" path="res://assets/npc/kas/idle/kas_idle_right_08.png" id="idle_8"]
+
+[resource]
+animations = [{
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("conversation_1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("conversation_2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("conversation_3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("conversation_4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("conversation_5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("conversation_6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("conversation_7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("conversation_8")
+}],
+"loop": 1,
+"name": &"front",
+"speed": 4.0
+}, {
+"frames": [{
+"duration": 1.0,
+"texture": ExtResource("idle_1")
+}, {
+"duration": 1.0,
+"texture": ExtResource("idle_2")
+}, {
+"duration": 1.0,
+"texture": ExtResource("idle_3")
+}, {
+"duration": 1.0,
+"texture": ExtResource("idle_4")
+}, {
+"duration": 1.0,
+"texture": ExtResource("idle_5")
+}, {
+"duration": 1.0,
+"texture": ExtResource("idle_6")
+}, {
+"duration": 1.0,
+"texture": ExtResource("idle_7")
+}, {
+"duration": 1.0,
+"texture": ExtResource("idle_8")
+}],
+"loop": 1,
+"name": &"side",
+"speed": 4.0
+}]

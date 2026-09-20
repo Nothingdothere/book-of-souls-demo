@@ -1,0 +1,12 @@
+{
+  "character": "Kas",
+  "animation": "idle_right",
+  "frame_count": 8,
+  "frame_size": [1024, 1536],
+  "playback_fps": 4,
+  "loop_duration_seconds": 2.0,
+  "loop_mode": "ping_pong",
+  "sequence": [1, 2, 3, 4, 5, 4, 3, 2],
+  "background": "transparent",
+  "notes": "Body and clothing remain nearly still. Cosmic darkness streams upward; star groups twinkle subtly."
+}

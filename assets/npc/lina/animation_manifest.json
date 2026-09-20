@@ -1,0 +1,13 @@
+{
+  "character": "fractured_soul_girl",
+  "animation": "idle_front_self_hug",
+  "frame_count": 14,
+  "frame_size": [1024, 1536],
+  "playback_fps": 4,
+  "loop_duration_seconds": 3.5,
+  "loop_mode": "loop",
+  "phase_sequence": ["A", "A", "B", "C", "C2", "D", "E", "F", "F", "E", "D", "C2", "C", "B"],
+  "background": "transparent",
+  "spritesheet_grid": [7, 2],
+  "notes": "NPC holds herself by the shoulders, slowly lowers both arms to reveal cosmic wrist mist, pauses while the mist sways, then returns to the closed pose."
+}

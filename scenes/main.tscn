@@ -1,0 +1,78 @@
+[gd_scene format=3 uid="uid://cm3uiwav5w8sf"]
+
+[ext_resource type="PackedScene" path="res://scenes/player.tscn" id="1"]
+[ext_resource type="Script" uid="uid://byf04denukx7j" path="res://scripts/library.gd" id="2"]
+[ext_resource type="Texture2D" uid="uid://bh8mgmb2a4x74" path="res://assets/background/01_background.png" id="3"]
+[ext_resource type="Texture2D" uid="uid://ddwa4m0hkjnvm" path="res://assets/background/02_midground.png" id="4"]
+[ext_resource type="Texture2D" uid="uid://blo70cnh5x4xd" path="res://assets/background/04_foreground.png" id="5"]
+[ext_resource type="Texture2D" uid="uid://cqrb0o1nrcxkl" path="res://assets/background/05_props.png" id="6"]
+[ext_resource type="Texture2D" uid="uid://cc1ebjvt5jxl5" path="res://assets/foreground/03_ground.png" id="7"]
+[ext_resource type="PackedScene" path="res://scenes/kas.tscn" id="8"]
+[ext_resource type="PackedScene" path="res://scenes/dialogue.tscn" id="9"]
+
+[sub_resource type="WorldBoundaryShape2D" id="FloorShape"]
+distance = 100.0
+
+[node name="Main" type="Node2D" unique_id=1185851889]
+script = ExtResource("2")
+
+[node name="BackgroundArt" type="Node2D" parent="." unique_id=685094333]
+
+[node name="DistantView" type="Sprite2D" parent="BackgroundArt" unique_id=1836449346]
+position = Vector2(851.99994, 450.99997)
+scale = Vector2(1.18, 1.18)
+texture = ExtResource("3")
+
+[node name="Library" type="Sprite2D" parent="BackgroundArt" unique_id=1024192152]
+position = Vector2(-32, -38.000004)
+scale = Vector2(1.0197368, 1.0839533)
+texture = ExtResource("4")
+centered = false
+
+[node name="FloorArt" type="Sprite2D" parent="BackgroundArt" unique_id=1832315932]
+texture = ExtResource("5")
+centered = false
+
+[node name="Furniture" type="Sprite2D" parent="BackgroundArt" unique_id=1913081263]
+position = Vector2(22, -26)
+scale = Vector2(0.99880385, 1.0053135)
+texture = ExtResource("6")
+centered = false
+
+[node name="Ground" type="StaticBody2D" parent="." unique_id=890452060]
+position = Vector2(836, 840)
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Ground" unique_id=1217324070]
+position = Vector2(7, 16)
+shape = SubResource("FloorShape")
+
+[node name="Player" parent="." unique_id=35980382 instance=ExtResource("1")]
+position = Vector2(687, 771)
+
+[node name="Kas" parent="." unique_id=528047845 instance=ExtResource("8")]
+position = Vector2(254, 731)
+
+[node name="ForegroundArt" type="Node2D" parent="." unique_id=1327142070]
+z_index = 5
+
+[node name="Books" type="Sprite2D" parent="ForegroundArt" unique_id=1654961831]
+position = Vector2(-35, 0)
+scale = Vector2(1.0406698, 0.9936238)
+texture = ExtResource("7")
+centered = false
+
+[node name="Interface" type="CanvasLayer" parent="." unique_id=127995821]
+
+[node name="Controls" type="Label" parent="Interface" unique_id=824993335]
+offset_left = 26.0
+offset_top = 20.0
+offset_right = 650.0
+offset_bottom = 54.0
+theme_override_colors/font_color = Color(0.86, 0.82, 0.72, 0.85)
+theme_override_colors/font_shadow_color = Color(0.03, 0.025, 0.02, 0.9)
+theme_override_constants/shadow_offset_x = 1
+theme_override_constants/shadow_offset_y = 2
+theme_override_font_sizes/font_size = 17
+text = "A / D  или  ← / → — идти     ·     E — поговорить"
+
+[node name="Dialogue" parent="." unique_id=668878663 instance=ExtResource("9")]
