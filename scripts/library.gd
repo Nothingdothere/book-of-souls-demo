@@ -307,8 +307,13 @@ func _set_location(destination: String, spawn: Vector2) -> void:
 	player.velocity = Vector2.ZERO
 	player.left_boundary = -100000000.0 if destination == "street" else 155.0 if in_hall else 100.0
 	player.right_boundary = INF if in_hall or destination == "street" else 1530.0
+	var location_zoom: float = 1.0 if in_hall else coffee_interior.get("gameplay_zoom") if destination == "cafe" else coffee_street.get("gameplay_zoom")
+	camera.zoom = Vector2.ONE * location_zoom
+	camera.position.y = -305.0 if in_hall else -320.0
 	camera.limit_left = -100000000 if destination == "street" else 0
 	camera.limit_right = 10000000 if in_hall else 1672 if destination == "cafe" else 2700
+	camera.limit_top = 0 if in_hall else -200
+	camera.limit_bottom = 941 if in_hall else 1100
 	camera.reset_smoothing()
 	controls.text = "A / D, стрелки — идти     ·     E — поговорить" if in_hall else "A / D, стрелки — идти"
 	mobile_controls.set_talk_visible(in_hall)

@@ -7,8 +7,10 @@
 [ext_resource type="SpriteFrames" path="res://assets/cat/cat_frames.tres" id="5"]
 [ext_resource type="Script" uid="uid://cs4rynamxo2n" path="res://scripts/coffee_cat.gd" id="6"]
 [ext_resource type="Texture2D" uid="uid://be2qplev1nyeh" path="res://assets/character/no_cat/dark_idle_right_01.png" id="7"]
+[ext_resource type="Script" path="res://scripts/coffee.gd" id="8"]
 
 [node name="Coffee" type="Node2D" unique_id=887594117]
+script = ExtResource("8")
 
 [node name="Floor" type="Sprite2D" parent="." unique_id=658893596]
 z_index = -3
@@ -19,7 +21,7 @@ centered = false
 [node name="Backdrop" type="Polygon2D" parent="." unique_id=1132433378]
 z_index = -20
 color = Color(0.129, 0.11, 0.106, 1)
-polygon = PackedVector2Array(0, -200, 1672, -200, 1672, 1100, 0, 1100)
+polygon = PackedVector2Array(-150, -200, 1822, -200, 1822, 1100, -150, 1100)
 
 [node name="Wall" type="Sprite2D" parent="." unique_id=961850424]
 z_index = -12
@@ -56,7 +58,7 @@ position = Vector2(1080, 771)
 [node name="DarkPreview" type="Sprite2D" parent="CoffeeSpawn" unique_id=496091799]
 editor_description = "Предпросмотр Дарка без кошки. Scale меняет размер в кофейне, Position — вертикальное совмещение с полом. В игре макет скрывается."
 z_index = 1
-position = Vector2(-93.32666, -11.126242)
-scale = Vector2(0.4375879, 0.41526046)
+position = Vector2(-137.00003, 15.000003)
+scale = Vector2(0.4278222, 0.39768228)
 texture = ExtResource("7")
 offset = Vector2(-38, -744)

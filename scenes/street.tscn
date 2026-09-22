@@ -7,8 +7,8 @@
 [ext_resource type="Texture2D" uid="uid://dp8hvdeim2mvx" path="res://assets/coffee/street_ground.png" id="5"]
 [ext_resource type="Texture2D" uid="uid://pkl5h8yoqbq5" path="res://assets/coffee/cafe_exterior.png" id="6"]
 [ext_resource type="Texture2D" uid="uid://wtmo822muwpy" path="res://assets/coffee/street_foreground.png" id="7"]
-[ext_resource type="Script" path="res://scripts/street.gd" id="8"]
-[ext_resource type="Texture2D" path="res://assets/character/no_cat/dark_idle_right_01.png" id="9"]
+[ext_resource type="Script" uid="uid://befeda8q6prvq" path="res://scripts/street.gd" id="8"]
+[ext_resource type="Texture2D" uid="uid://be2qplev1nyeh" path="res://assets/character/no_cat/dark_idle_right_01.png" id="9"]
 
 [node name="Street" type="Node2D" unique_id=1197661890]
 script = ExtResource("8")
@@ -66,14 +66,14 @@ scale = Vector2(1.4481837, 1.4823387)
 texture = ExtResource("7")
 centered = false
 
-[node name="PlayerSpawn" type="Marker2D" parent="."]
-position = Vector2(1300, 771)
+[node name="PlayerSpawn" type="Marker2D" parent="." unique_id=983014111]
 editor_description = "Передвигайте узел, чтобы изменить место появления Дарка на улице. Масштаб дочернего DarkPreview задаёт размер Дарка именно здесь."
+position = Vector2(1300, 771)
 
-[node name="DarkPreview" type="Sprite2D" parent="PlayerSpawn"]
+[node name="DarkPreview" type="Sprite2D" parent="PlayerSpawn" unique_id=1077538466]
+editor_description = "Предпросмотр Дарка без кошки. Меняйте Scale по обеим осям одинаково; в игре этот спрайт скрыт, а масштаб получает настоящий игрок."
 z_index = 1
-position = Vector2(0, 40)
+position = Vector2(114, 69)
 scale = Vector2(0.285, 0.285)
 texture = ExtResource("9")
 offset = Vector2(-38, -744)
-editor_description = "Предпросмотр Дарка без кошки. Меняйте Scale по обеим осям одинаково; в игре этот спрайт скрыт, а масштаб получает настоящий игрок."

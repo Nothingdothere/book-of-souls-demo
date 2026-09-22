@@ -1,5 +1,7 @@
 extends Node2D
 
+@export_range(0.5, 1.0, 0.01) var gameplay_zoom := 0.65
+
 # The first stretch is arranged by hand in street.tscn. Only its left edge
 # grows procedurally, so edits to the authored houses remain untouched.
 const GAPS := [-24.0, 0.0, 0.0, 24.0, 120.0, 260.0, 390.0]
@@ -16,7 +18,14 @@ var rng := RandomNumberGenerator.new()
 
 
 func _ready() -> void:
-	$PlayerSpawn/DarkPreview.hide()
+	if get_parent() is Window:
+		var preview_camera := Camera2D.new()
+		preview_camera.position = Vector2($PlayerSpawn.position.x, 451)
+		preview_camera.zoom = Vector2.ONE * gameplay_zoom
+		add_child(preview_camera)
+		preview_camera.make_current()
+	else:
+		$PlayerSpawn/DarkPreview.hide()
 	rng.randomize()
 	house_edge = minf(house_sources[0].position.x, house_sources[1].position.x)
 	for source in repeating_sources:
