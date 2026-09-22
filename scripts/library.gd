@@ -29,6 +29,10 @@ var point_visited := false
 var transitioning := false
 var quest_toast: Label
 var quest_toast_shown := false
+var hall_music: AudioStreamPlayer
+var point_music: AudioStreamPlayer
+var door_sfx: AudioStreamPlayer
+var bell_sfx: AudioStreamPlayer
 
 func _ready() -> void:
 	default_player_art_scale = player.get_node("Artwork").scale
@@ -103,11 +107,38 @@ func _ready() -> void:
 	]
 	repeating_layers.append(RepeatingArt.new(tables))
 	_update_environment()
+	_setup_audio()
+
+func _setup_audio() -> void:
+	hall_music = _looping_player("res://assets/audio/music/hall_theme.mp3", -14.0)
+	point_music = _looping_player("res://assets/audio/music/point_theme.mp3", -14.0)
+	door_sfx = _sfx_player("res://assets/audio/sfx/door_open.ogg")
+	bell_sfx = _sfx_player("res://assets/audio/sfx/shop_bell.wav")
+	hall_music.play()
+
+func _looping_player(path: String, volume_db: float) -> AudioStreamPlayer:
+	var player_node := AudioStreamPlayer.new()
+	player_node.stream = load(path)
+	player_node.volume_db = volume_db
+	player_node.finished.connect(player_node.play)
+	add_child(player_node)
+	return player_node
+
+func _sfx_player(path: String, volume_db := 0.0) -> AudioStreamPlayer:
+	var player_node := AudioStreamPlayer.new()
+	player_node.stream = load(path)
+	player_node.volume_db = volume_db
+	add_child(player_node)
+	return player_node
 
 func _process(_delta: float) -> void:
 	if location == "cafe" and player.position.x < 310.0:
+		door_sfx.play()
+		bell_sfx.play()
 		_set_location("street", coffee_street.get_node("PlayerSpawn").position)
 	elif location == "street" and player.position.x > 2370.0:
+		door_sfx.play()
+		bell_sfx.play()
 		_set_location("cafe", Vector2(430, 771))
 	if location == "street":
 		var view_width := get_viewport().get_visible_rect().size.x / camera.zoom.x
@@ -316,6 +347,7 @@ func _set_location(destination: String, spawn: Vector2) -> void:
 	player.visual_offset = preview.position if preview != null else Vector2.ZERO
 	player.get_node("ContactShadow").position = Vector2(0, -1) + player.visual_offset
 	player.set_without_cat(destination == "cafe")
+	player.outdoor_footsteps = destination == "street"
 	player.call("_align_frame")
 	player.position = spawn
 	player.velocity = Vector2.ZERO
@@ -331,6 +363,13 @@ func _set_location(destination: String, spawn: Vector2) -> void:
 	camera.reset_smoothing()
 	controls.text = "A / D, стрелки — идти     ·     E — поговорить" if in_hall else "A / D, стрелки — идти"
 	mobile_controls.set_talk_visible(in_hall)
+	hall_music.stream_paused = not in_hall
+	if in_hall:
+		point_music.stream_paused = true
+	else:
+		if not point_music.playing:
+			point_music.play()
+		point_music.stream_paused = false
 	_update_travel_button()
 
 func _unhandled_key_input(event: InputEvent) -> void:

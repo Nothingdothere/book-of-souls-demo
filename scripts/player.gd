@@ -13,6 +13,12 @@ var no_cat_frames: SpriteFrames
 var without_cat := false
 var visual_offset := Vector2.ZERO
 var smoke_burst: CPUParticles2D
+var footstep_player: AudioStreamPlayer
+var indoor_step: AudioStream
+var outdoor_step: AudioStream
+var outdoor_footsteps := false
+const FOOTSTEP_INTERVAL := 0.32
+var footstep_elapsed := FOOTSTEP_INTERVAL
 
 func award_soul_star() -> void:
 	if has_soul_star:
@@ -34,6 +40,10 @@ func _ready() -> void:
 	artwork.animation_changed.connect(_align_frame)
 	_align_frame()
 	_setup_smoke_burst()
+	indoor_step = load("res://assets/audio/sfx/footstep_indoor.ogg")
+	outdoor_step = load("res://assets/audio/sfx/footstep_outdoor.ogg")
+	footstep_player = AudioStreamPlayer.new()
+	add_child(footstep_player)
 
 func _setup_smoke_burst() -> void:
 	var puff_gradient := Gradient.new()
@@ -131,10 +141,19 @@ func _physics_process(delta: float) -> void:
 		velocity.y = 0.0
 	move_and_slide()
 	position.x = clampf(position.x, left_boundary, right_boundary)
+	var walking := direction != 0.0 and absf(velocity.x) > 0.1
 	if direction != 0.0:
 		# Temporary reflection until separate left-facing drawings exist.
 		artwork.flip_h = direction < 0.0
-		artwork.play("walk" if absf(velocity.x) > 0.1 else "idle")
+		artwork.play("walk" if walking else "idle")
 	else:
 		artwork.play("idle")
 	_align_frame()
+	if walking and is_on_floor():
+		footstep_elapsed += delta
+		if footstep_elapsed >= FOOTSTEP_INTERVAL:
+			footstep_elapsed = 0.0
+			footstep_player.stream = outdoor_step if outdoor_footsteps else indoor_step
+			footstep_player.play()
+	else:
+		footstep_elapsed = FOOTSTEP_INTERVAL

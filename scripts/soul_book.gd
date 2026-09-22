@@ -24,9 +24,13 @@ var page_number: Label
 var previous: Button
 var next: Button
 var handwriting: Font
+var page_turn_sfx: AudioStreamPlayer
 
 func _ready() -> void:
 	layer = 30
+	page_turn_sfx = AudioStreamPlayer.new()
+	page_turn_sfx.stream = load("res://assets/audio/sfx/book_flip.ogg")
+	add_child(page_turn_sfx)
 	entries = JSON.parse_string(FileAccess.get_file_as_string("res://dialogue/soul_dossiers.json"))
 	for i in range(6):
 		turn_frames.append(load("res://assets/ui/book/frame_%02d.png" % i))
@@ -169,6 +173,7 @@ func turn(direction: int) -> void:
 	target_page = page + direction
 	turn_elapsed = 0.0
 	turning = true
+	page_turn_sfx.play()
 	contents.hide()
 	previous.disabled = true
 	next.disabled = true
