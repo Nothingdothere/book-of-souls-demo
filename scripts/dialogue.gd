@@ -239,6 +239,9 @@ func advance() -> void:
 		if current_topic != "":
 			visited[current_topic] = true
 			topic_finished.emit(conversation_id, current_topic)
+		if data.get("topics", []).is_empty():
+			close()
+			return
 		_show_choices()
 
 func _finish_followup() -> void:

@@ -60,6 +60,9 @@ func verify() -> void:
 	check(scene.travel_button.visible and scene.travel_button.text == "В кофейню", "Mobile travel button missing")
 	scene.travel_button.pressed.emit()
 	check(scene.location == "cafe" and scene.coffee_world.visible, "Coffee location did not load")
+	check(dialogue.active and dialogue.conversation_id == "point", "Point greeting did not open on first arrival")
+	finish_lines(dialogue)
+	check(not dialogue.active, "Point greeting did not finish")
 	check(is_equal_approx(scene.camera.zoom.x, scene.coffee_interior.gameplay_zoom), "Coffee camera zoom does not match the scene setting")
 	check(scene.coffee_interior.scene_file_path.ends_with("coffee.tscn") and scene.coffee_street.scene_file_path.ends_with("street.tscn"), "Editable scenes are not used by gameplay")
 	check(not scene.coffee_interior.get_node("CoffeeSpawn/DarkPreview").visible, "Coffee editor preview appeared in the game")
@@ -74,6 +77,8 @@ func verify() -> void:
 	for frame in range(3):
 		await process_frame
 	check(scene.location == "street" and scene.coffee_street.visible, "Walking left did not lead outdoors (location=%s, x=%.1f)" % [scene.location, scene.player.position.x])
+	check(not scene.player.without_cat and scene.player.artwork.sprite_frames == scene.player.hall_frames, "Dark did not reunite with the cat outdoors")
+	check(not cat.is_visible_in_tree(), "Counter cat remained visible outdoors")
 	check(is_equal_approx(scene.camera.zoom.x, scene.coffee_street.gameplay_zoom), "Street camera zoom does not match the scene setting")
 	check(not scene.coffee_street.get_node("PlayerSpawn/DarkPreview").visible, "Street editor preview appeared in the game")
 	check(scene.player.artwork.scale == scene.coffee_street.get_node("PlayerSpawn/DarkPreview").scale, "Street character scale ignored the scene preview")
@@ -89,6 +94,7 @@ func verify() -> void:
 	for frame in range(3):
 		await process_frame
 	check(scene.location == "cafe" and scene.coffee_interior.visible, "Walking back did not enter cafe")
+	check(scene.player.without_cat and cat.is_visible_in_tree(), "Cat did not return to the coffee counter")
 	scene.travel_button.pressed.emit()
 	check(scene.location == "hall" and scene.player.position.distance_to(saved_position) < 1.0, "Return to hall did not restore position")
 	check(is_equal_approx(scene.camera.zoom.x, 1.0), "Hall camera zoom was not restored")
