@@ -141,8 +141,9 @@ func _conversation_started() -> void:
 		quest_label.text = "Задание: выслушать Лину и решить её судьбу"
 	player.controls_locked = true
 	player.velocity.x = 0.0
-	var target: Node2D = lina if dialogue.conversation_id == "lina" else kas
-	player.artwork.flip_h = player.position.x > target.position.x
+	var target: Node2D = lina if dialogue.conversation_id == "lina" else kas if dialogue.conversation_id.begins_with("kas") else null
+	if target != null:
+		player.artwork.flip_h = player.position.x > target.position.x
 	player.artwork.play("idle")
 	if target == kas:
 		kas.set_conversing(true, player.global_position.x)
@@ -279,9 +280,12 @@ func travel() -> void:
 		return
 	if location == "hall":
 		hall_position = player.position
+		var first_visit := not point_visited
 		point_visited = true
 		quest_label.text = "Задание выполнено: вернуться в Точку"
 		_set_location("cafe", coffee_interior.get_node("CoffeeSpawn").position)
+		if first_visit:
+			dialogue.start("point")
 	else:
 		_set_location("hall", hall_position)
 
