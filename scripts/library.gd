@@ -301,7 +301,7 @@ func _set_location(destination: String, spawn: Vector2) -> void:
 	art_sprite.scale = preview.scale if preview != null else default_player_art_scale
 	player.visual_offset = preview.position if preview != null else Vector2.ZERO
 	player.get_node("ContactShadow").position = Vector2(0, -1) + player.visual_offset
-	player.set_without_cat(not in_hall)
+	player.set_without_cat(destination == "cafe")
 	player.call("_align_frame")
 	player.position = spawn
 	player.velocity = Vector2.ZERO

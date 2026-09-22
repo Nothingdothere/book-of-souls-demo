@@ -8,7 +8,7 @@
 [ext_resource type="Texture2D" uid="uid://pkl5h8yoqbq5" path="res://assets/coffee/cafe_exterior.png" id="6"]
 [ext_resource type="Texture2D" uid="uid://wtmo822muwpy" path="res://assets/coffee/street_foreground.png" id="7"]
 [ext_resource type="Script" uid="uid://befeda8q6prvq" path="res://scripts/street.gd" id="8"]
-[ext_resource type="Texture2D" uid="uid://be2qplev1nyeh" path="res://assets/character/no_cat/dark_idle_right_01.png" id="9"]
+[ext_resource type="Texture2D" uid="uid://c8cgmxwee3t6k" path="res://assets/character/dark_idle_right_01.png" id="9"]
 
 [node name="Street" type="Node2D" unique_id=1197661890]
 script = ExtResource("8")
@@ -76,4 +76,4 @@ z_index = 1
 position = Vector2(114, 69)
 scale = Vector2(0.285, 0.285)
 texture = ExtResource("9")
-offset = Vector2(-38, -744)
+offset = Vector2(-38, -711)
