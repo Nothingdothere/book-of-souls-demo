@@ -17,6 +17,7 @@ var footstep_player: AudioStreamPlayer
 var indoor_step: AudioStream
 var outdoor_step: AudioStream
 var outdoor_footsteps := false
+var footstep_rng := RandomNumberGenerator.new()
 # Foot-contact poses in the 8-frame walk cycle (see PIVOTS below).
 const FOOTSTEP_FRAMES := [0, 4]
 
@@ -41,6 +42,7 @@ func _ready() -> void:
 	artwork.animation_changed.connect(_align_frame)
 	_align_frame()
 	_setup_smoke_burst()
+	footstep_rng.randomize()
 	indoor_step = load("res://assets/audio/sfx/footstep_indoor.ogg")
 	outdoor_step = load("res://assets/audio/sfx/footstep_outdoor.ogg")
 	footstep_player = AudioStreamPlayer.new()
@@ -102,9 +104,16 @@ func dissolve_in(duration := 0.18) -> void:
 	await tween.finished
 
 func _on_walk_frame() -> void:
-	if artwork.animation == &"walk" and artwork.frame in FOOTSTEP_FRAMES:
-		footstep_player.stream = outdoor_step if outdoor_footsteps else indoor_step
-		footstep_player.play()
+	if artwork.animation != &"walk" or artwork.frame not in FOOTSTEP_FRAMES:
+		return
+	footstep_player.stream = outdoor_step if outdoor_footsteps else indoor_step
+	# One sample per surface reads as a machine-gun loop if played identically
+	# every step; a per-step pitch/volume jitter (plus a small offset between
+	# the two feet) fakes the variation a pair of real recordings would give.
+	var foot_offset := 0.0 if artwork.frame == FOOTSTEP_FRAMES[0] else 0.05
+	footstep_player.pitch_scale = 1.0 + foot_offset + footstep_rng.randf_range(-0.08, 0.08)
+	footstep_player.volume_db = footstep_rng.randf_range(-3.0, 0.0)
+	footstep_player.play()
 
 func _align_frame() -> void:
 	var pivot: Vector2 = PIVOTS[artwork.frame] if artwork.animation == &"walk" else NO_CAT_IDLE_PIVOT if without_cat else IDLE_PIVOT
