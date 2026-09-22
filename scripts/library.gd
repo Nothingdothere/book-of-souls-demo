@@ -110,8 +110,9 @@ func _ready() -> void:
 	_setup_audio()
 
 func _setup_audio() -> void:
-	hall_music = _looping_player("res://assets/audio/music/hall_theme.mp3", -14.0)
-	point_music = _looping_player("res://assets/audio/music/point_theme.mp3", -14.0)
+	# -20dB ~= -50% loudness on top of the original quiet mix.
+	hall_music = _looping_player("res://assets/audio/music/hall_theme.mp3", -20.0)
+	point_music = _looping_player("res://assets/audio/music/point_theme.mp3", -20.0)
 	door_sfx = _sfx_player("res://assets/audio/sfx/door_open.ogg")
 	bell_sfx = _sfx_player("res://assets/audio/sfx/shop_bell.wav")
 	hall_music.play()

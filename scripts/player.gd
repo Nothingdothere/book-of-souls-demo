@@ -112,7 +112,8 @@ func _on_walk_frame() -> void:
 	# the two feet) fakes the variation a pair of real recordings would give.
 	var foot_offset := 0.0 if artwork.frame == FOOTSTEP_FRAMES[0] else 0.05
 	footstep_player.pitch_scale = 1.0 + foot_offset + footstep_rng.randf_range(-0.08, 0.08)
-	footstep_player.volume_db = footstep_rng.randf_range(-3.0, 0.0)
+	# -10.5dB ~= -70% loudness on top of the base jitter range.
+	footstep_player.volume_db = footstep_rng.randf_range(-13.5, -10.5)
 	footstep_player.play()
 
 func _align_frame() -> void:
