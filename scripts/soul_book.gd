@@ -77,8 +77,8 @@ func _ready() -> void:
 	page_turn_material.set_shader_parameter("base_frame", turn_frames[0])
 	animation.material = page_turn_material
 	animation.hide()
-	previous = _button("← Назад", Rect2(285, 890, 225, 52), turn.bind(-1))
-	next = _button("Дальше →", Rect2(1020, 890, 225, 52), turn.bind(1))
+	previous = _button("Назад", Rect2(285, 890, 225, 52), turn.bind(-1))
+	next = _button("Дальше", Rect2(1020, 890, 225, 52), turn.bind(1))
 	_button("Закрыть · J / Esc", Rect2(620, 939, 310, 48), close)
 	var caption := _label(stage, Rect2(570, 886, 395, 38), 20)
 	caption.text = "Книга душ · нажми на страницу"

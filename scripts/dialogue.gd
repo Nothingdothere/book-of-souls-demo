@@ -121,7 +121,7 @@ func _build_interface() -> void:
 	choices.add_theme_constant_override("v_separation", 5)
 	stage.add_child(choices)
 	skip_intro_button = Button.new()
-	skip_intro_button.text = "К вопросам »"
+	skip_intro_button.text = "К вопросам"
 	skip_intro_button.position = Vector2(925, 471)
 	skip_intro_button.size = Vector2(184, 29)
 	skip_intro_button.flat = true
@@ -283,11 +283,11 @@ func _show_choices(menu_page := 0) -> void:
 	for topic in topics.slice(menu_page * page_size, (menu_page + 1) * page_size):
 		var topic_id: String = topic["id"]
 		var read_before := visited.has(topic_id)
-		_button(("✓ " if read_before else "") + topic["label"], choose_topic.bind(topic_id), read_before)
+		_button(("(прочитано) " if read_before else "") + topic["label"], choose_topic.bind(topic_id), read_before)
 	if conversation_id == "lina":
 		_button("Вынести решение", _show_verdict)
 	if count > 1:
-		_button("Другие вопросы → (%d/%d)" % [menu_page + 1, count], _show_choices.bind(menu_page + 1))
+		_button("Другие вопросы (%d/%d)" % [menu_page + 1, count], _show_choices.bind(menu_page + 1))
 	_button("Закончить разговор", close)
 	choices.show()
 	choices.get_child(0).grab_focus()

@@ -22,7 +22,7 @@ func verify() -> void:
 	var right: Button
 	var talk: Button
 	for button in buttons:
-		if button.text == "▶":
+		if button.name == "MoveRight":
 			right = button
 		if button.text.begins_with("E"):
 			talk = button

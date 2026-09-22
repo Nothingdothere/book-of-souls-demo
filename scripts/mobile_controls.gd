@@ -20,8 +20,12 @@ func _build_interface() -> void:
 	root_control.set_anchors_and_offsets_preset(Control.PRESET_FULL_RECT)
 	root_control.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	add_child(root_control)
-	var left := _button("◀", Vector2(30, -142), Vector2(106, 106), false)
-	var right := _button("▶", Vector2(150, -142), Vector2(106, 106), false)
+	var left := _button("", Vector2(30, -142), Vector2(106, 106), false)
+	var right := _button("", Vector2(150, -142), Vector2(106, 106), false)
+	left.name = "MoveLeft"
+	right.name = "MoveRight"
+	_arrow(left, false)
+	_arrow(right, true)
 	left.button_down.connect(Input.action_press.bind("ui_left"))
 	left.button_up.connect(Input.action_release.bind("ui_left"))
 	right.button_down.connect(Input.action_press.bind("ui_right"))
@@ -48,7 +52,8 @@ func _build_interface() -> void:
 
 func _button(text: String, offset: Vector2, dimensions: Vector2, from_right: bool) -> Button:
 	var button := Button.new()
-	button.name = text.replace("\n", "_")
+	if not text.is_empty():
+		button.name = text.replace("\n", "_")
 	button.text = text
 	button.focus_mode = Control.FOCUS_NONE
 	button.size = dimensions
@@ -75,6 +80,17 @@ func _button(text: String, offset: Vector2, dimensions: Vector2, from_right: boo
 	button.position = offset
 	root_control.add_child(button)
 	return button
+
+func _arrow(button: Button, points_right: bool) -> void:
+	var shape := Polygon2D.new()
+	shape.position = button.size * 0.5
+	shape.color = Color("f4e5c3")
+	shape.polygon = PackedVector2Array([
+		Vector2(18 if points_right else -18, 0),
+		Vector2(-15 if points_right else 15, -19),
+		Vector2(-15 if points_right else 15, 19)
+	])
+	button.add_child(shape)
 
 func _process(_delta: float) -> void:
 	if not mobile_enabled:

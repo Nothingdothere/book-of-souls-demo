@@ -22,6 +22,10 @@ window/size/window_width_override=1280
 window/size/window_height_override=720
 window/stretch/mode="canvas_items"
 
+[gui]
+
+theme/custom_font="res://assets/fonts/NotoSans.ttf"
+
 [rendering]
 
 renderer/rendering_method="gl_compatibility"

@@ -20,6 +20,13 @@ var book_hint: Label
 var mobile_controls: CanvasLayer
 
 func _ready() -> void:
+	# The level may be adjusted in the editor, but the walkable floor must
+	# continue under every repeated room tile.
+	var floor_collision: CollisionShape2D = $Ground/CollisionShape2D
+	if floor_collision.shape is RectangleShape2D:
+		var floor_boundary := WorldBoundaryShape2D.new()
+		floor_boundary.distance = 100.0
+		floor_collision.shape = floor_boundary
 	dialogue.conversation_started.connect(_conversation_started)
 	dialogue.conversation_finished.connect(_conversation_finished)
 	dialogue.topic_finished.connect(_topic_finished)
@@ -33,9 +40,10 @@ func _ready() -> void:
 	mobile_controls.name = "MobileControls"
 	mobile_controls.set_script(preload("res://scripts/mobile_controls.gd"))
 	add_child(mobile_controls)
+	controls.text = "A / D, стрелки — идти     ·     E — поговорить"
 	controls.visible = not mobile_controls.mobile_enabled
 	quest_label = _hud_label(Vector2(26, 60), 18)
-	quest_label.text = "◇ Поговорить с Касом"
+	quest_label.text = "Задание: поговорить с Касом"
 	book_hint = _hud_label(Vector2(26, 92), 17)
 	book_hint.hide()
 	lina = Node2D.new()
@@ -98,7 +106,7 @@ func _conversation_started() -> void:
 	book_hint.hide()
 	if dialogue.conversation_id == "lina":
 		book.lina_known = true
-		quest_label.text = "◇ Выслушать Лину и решить её судьбу"
+		quest_label.text = "Задание: выслушать Лину и решить её судьбу"
 	player.controls_locked = true
 	player.velocity.x = 0.0
 	var target: Node2D = lina if dialogue.conversation_id == "lina" else kas
@@ -116,7 +124,7 @@ func _conversation_finished() -> void:
 	mobile_controls.set_gameplay_visible(true)
 	quest_label.show()
 	if dialogue.lina_resolved:
-		quest_label.text = "✓ Судьба Лины решена"
+		quest_label.text = "Задание выполнено: судьба Лины решена"
 	if quest_unlocked:
 		book_hint.text = "J — книга душ" if book_seen else "Новая книга душ · Нажми J, чтобы открыть досье"
 		book_hint.show()
@@ -136,7 +144,7 @@ func _topic_finished(character: String, topic: String) -> void:
 		quest_unlocked = true
 		dialogue.lina_available = true
 		book.unlocked = true
-		quest_label.text = "◇ Поговорить с расколотой душой"
+		quest_label.text = "Задание: поговорить с расколотой душой"
 
 func _book_opened() -> void:
 	book_seen = true

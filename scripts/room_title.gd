@@ -23,7 +23,7 @@ func _ready() -> void:
 		var system_font := SystemFont.new()
 		system_font.font_names = PackedStringArray(["Georgia", "Times New Roman"])
 		font = system_font
-	for text in ["Читальный зал", "◇  ПЕРВАЯ ДУША — ЛИНА  ◇"]:
+	for text in ["Читальный зал", "ПЕРВАЯ ДУША — ЛИНА"]:
 		var label := Label.new()
 		label.text = text
 		label.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
