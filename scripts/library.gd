@@ -18,6 +18,13 @@ var book_seen := false
 var quest_label: Label
 var book_hint: Label
 var mobile_controls: CanvasLayer
+var coffee_world: Node2D
+var travel_button: Button
+var location := "hall"
+var hall_position := Vector2(687, 771)
+var point_visited := false
+var quest_toast: Label
+var quest_toast_shown := false
 
 func _ready() -> void:
 	# The level may be adjusted in the editor, but the walkable floor must
@@ -30,6 +37,7 @@ func _ready() -> void:
 	dialogue.conversation_started.connect(_conversation_started)
 	dialogue.conversation_finished.connect(_conversation_finished)
 	dialogue.topic_finished.connect(_topic_finished)
+	dialogue.followup_finished.connect(_followup_finished)
 	book = CanvasLayer.new()
 	book.name = "SoulBook"
 	book.set_script(preload("res://scripts/soul_book.gd"))
@@ -42,6 +50,12 @@ func _ready() -> void:
 	add_child(mobile_controls)
 	controls.text = "A / D, стрелки — идти     ·     E — поговорить"
 	controls.visible = not mobile_controls.mobile_enabled
+	coffee_world = Node2D.new()
+	coffee_world.name = "CoffeeWorld"
+	coffee_world.set_script(preload("res://scripts/coffee_world.gd"))
+	add_child(coffee_world)
+	_create_travel_button()
+	_create_quest_toast()
 	quest_label = _hud_label(Vector2(26, 60), 18)
 	quest_label.text = "Задание: поговорить с Касом"
 	book_hint = _hud_label(Vector2(26, 92), 17)
@@ -80,10 +94,15 @@ func _ready() -> void:
 	_update_environment()
 
 func _process(_delta: float) -> void:
-	_update_environment()
-	kas.prompt.visible = not dialogue.active and not book.active and absf(player.position.x - kas.position.x) <= TALK_DISTANCE
-	lina.prompt.visible = quest_unlocked and not dialogue.active and not book.active and not lina.resolved and absf(player.position.x - lina.position.x) <= TALK_DISTANCE
-	if player.position.x >= 2250 and not dialogue.active and not book.active:
+	if location == "cafe" and player.position.x < 310.0:
+		_set_location("street", Vector2(2260, 771))
+	elif location == "street" and player.position.x > 2370.0:
+		_set_location("cafe", Vector2(430, 771))
+	if location == "hall":
+		_update_environment()
+	kas.prompt.visible = location == "hall" and not dialogue.active and not book.active and absf(player.position.x - kas.position.x) <= TALK_DISTANCE
+	lina.prompt.visible = location == "hall" and quest_unlocked and not dialogue.active and not book.active and not lina.resolved and absf(player.position.x - lina.position.x) <= TALK_DISTANCE
+	if location == "hall" and player.position.x >= 2250 and not dialogue.active and not book.active:
 		room_title.reveal()
 
 func _update_environment() -> void:
@@ -94,10 +113,10 @@ func _update_environment() -> void:
 		art.update(camera.get_screen_center_position().x, view_width)
 
 func try_talk() -> void:
-	if book.active:
+	if book.active or location != "hall":
 		return
 	if not dialogue.active and absf(player.position.x - kas.position.x) <= TALK_DISTANCE:
-		dialogue.start()
+		dialogue.start("kas_return" if dialogue.lina_resolved and not dialogue.followup_completed else "kas")
 	elif quest_unlocked and not dialogue.active and not lina.resolved and absf(player.position.x - lina.position.x) <= TALK_DISTANCE:
 		dialogue.start("lina")
 
@@ -116,6 +135,7 @@ func _conversation_started() -> void:
 		kas.set_conversing(true, player.global_position.x)
 	controls.hide()
 	mobile_controls.set_gameplay_visible(false)
+	travel_button.hide()
 
 func _conversation_finished() -> void:
 	player.controls_locked = false
@@ -123,11 +143,23 @@ func _conversation_finished() -> void:
 	controls.visible = not mobile_controls.mobile_enabled
 	mobile_controls.set_gameplay_visible(true)
 	quest_label.show()
-	if dialogue.lina_resolved:
-		quest_label.text = "Задание выполнено: судьба Лины решена"
+	if dialogue.followup_completed:
+		quest_label.text = "Задание выполнено: вернуться в Точку" if point_visited else "Задание: вернуться в Точку"
+	elif dialogue.lina_resolved:
+		quest_label.text = "Задание: вернуться к Касу"
+		kas.prompt.text = "E — вернуться к Касу"
 	if quest_unlocked:
 		book_hint.text = "J — книга душ" if book_seen else "Новая книга душ · Нажми J, чтобы открыть досье"
 		book_hint.show()
+	_update_travel_button()
+	if dialogue.followup_completed and not quest_toast_shown:
+		quest_toast_shown = true
+		quest_toast.show()
+		var tween := create_tween()
+		tween.tween_property(quest_toast, "modulate:a", 1.0, 0.5)
+		tween.tween_interval(3.0)
+		tween.tween_property(quest_toast, "modulate:a", 0.0, 0.8)
+		tween.tween_callback(quest_toast.hide)
 
 func _hud_label(at: Vector2, font_size: int) -> Label:
 	var label := Label.new()
@@ -155,6 +187,7 @@ func _book_opened() -> void:
 	mobile_controls.set_gameplay_visible(false)
 	quest_label.hide()
 	book_hint.hide()
+	travel_button.hide()
 
 func _book_closed() -> void:
 	player.controls_locked = false
@@ -163,6 +196,104 @@ func _book_closed() -> void:
 	quest_label.show()
 	book_hint.text = "J — книга душ"
 	book_hint.show()
+	_update_travel_button()
+
+func _followup_finished() -> void:
+	quest_label.text = "Задание: вернуться в Точку"
+	kas.prompt.text = "E — поговорить с Касом"
+	_update_travel_button()
+
+func _create_travel_button() -> void:
+	travel_button = Button.new()
+	travel_button.name = "TravelButton"
+	travel_button.set_anchor(SIDE_LEFT, 1.0)
+	travel_button.set_anchor(SIDE_RIGHT, 1.0)
+	travel_button.add_theme_font_size_override("font_size", 16)
+	travel_button.add_theme_color_override("font_color", Color("f4e5c3"))
+	var style := StyleBoxFlat.new()
+	style.bg_color = Color(0.07, 0.055, 0.08, 0.89)
+	style.border_color = Color("c6a875")
+	style.set_border_width_all(2)
+	style.set_corner_radius_all(11)
+	travel_button.add_theme_stylebox_override("normal", style)
+	var hover := style.duplicate() as StyleBoxFlat
+	hover.bg_color = Color(0.26, 0.18, 0.15, 0.96)
+	travel_button.add_theme_stylebox_override("hover", hover)
+	travel_button.add_theme_stylebox_override("pressed", hover)
+	travel_button.pressed.connect(travel)
+	$Interface.add_child(travel_button)
+	_update_travel_button()
+
+func _create_quest_toast() -> void:
+	quest_toast = Label.new()
+	quest_toast.name = "QuestToast"
+	quest_toast.text = "НОВОЕ ЗАДАНИЕ: ВЕРНУТЬСЯ В ТОЧКУ"
+	quest_toast.horizontal_alignment = HORIZONTAL_ALIGNMENT_CENTER
+	quest_toast.size = Vector2(640, 52)
+	quest_toast.set_anchor(SIDE_LEFT, 0.5)
+	quest_toast.set_anchor(SIDE_RIGHT, 0.5)
+	quest_toast.position = Vector2(-320, 107)
+	quest_toast.add_theme_font_size_override("font_size", 23)
+	quest_toast.add_theme_color_override("font_color", Color("f2ddab"))
+	quest_toast.add_theme_color_override("font_shadow_color", Color.BLACK)
+	quest_toast.add_theme_constant_override("shadow_offset_y", 3)
+	quest_toast.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	quest_toast.modulate.a = 0.0
+	$Interface.add_child(quest_toast)
+	quest_toast.hide()
+
+func _update_travel_button() -> void:
+	if travel_button == null:
+		return
+	travel_button.visible = dialogue.followup_completed and not dialogue.active and not book.active
+	if mobile_controls.mobile_enabled:
+		travel_button.offset_left = -240
+		travel_button.offset_right = -14
+		travel_button.offset_top = 16
+		travel_button.offset_bottom = 60
+		travel_button.add_theme_font_size_override("font_size", 14)
+		travel_button.text = "В кофейню" if location == "hall" else "В зал распределения"
+	else:
+		travel_button.offset_left = -382
+		travel_button.offset_right = -22
+		travel_button.offset_top = 20
+		travel_button.offset_bottom = 68
+		travel_button.add_theme_font_size_override("font_size", 16)
+		travel_button.text = "Переместиться в кофейню" if location == "hall" else "Переместиться в зал распределения"
+
+func travel() -> void:
+	if not dialogue.followup_completed or dialogue.active or book.active:
+		return
+	if location == "hall":
+		hall_position = player.position
+		point_visited = true
+		quest_label.text = "Задание выполнено: вернуться в Точку"
+		_set_location("cafe", Vector2(1080, 771))
+	else:
+		_set_location("hall", hall_position)
+
+func _set_location(destination: String, spawn: Vector2) -> void:
+	location = destination
+	var in_hall := destination == "hall"
+	$BackgroundArt.visible = in_hall
+	$ForegroundArt.visible = in_hall
+	kas.visible = in_hall
+	lina.visible = in_hall
+	kas.get_node("Body/CollisionShape2D").set_deferred("disabled", not in_hall)
+	coffee_world.visible = not in_hall
+	if not in_hall:
+		coffee_world.set_zone(destination)
+	player.set_without_cat(not in_hall)
+	player.position = spawn
+	player.velocity = Vector2.ZERO
+	player.left_boundary = 155.0 if in_hall else 100.0
+	player.right_boundary = INF if in_hall else 1530.0 if destination == "cafe" else 2580.0
+	camera.limit_left = 0
+	camera.limit_right = 10000000 if in_hall else 1672 if destination == "cafe" else 2700
+	camera.reset_smoothing()
+	controls.text = "A / D, стрелки — идти     ·     E — поговорить" if in_hall else "A / D, стрелки — идти"
+	mobile_controls.set_talk_visible(in_hall)
+	_update_travel_button()
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_J:

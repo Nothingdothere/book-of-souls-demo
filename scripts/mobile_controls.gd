@@ -5,6 +5,7 @@ var mobile_enabled := false
 var gameplay_visible := true
 var root_control: Control
 var book_button: Button
+var talk_button: Button
 var rotate_hint: ColorRect
 
 func _ready() -> void:
@@ -31,6 +32,7 @@ func _build_interface() -> void:
 	right.button_down.connect(Input.action_press.bind("ui_right"))
 	right.button_up.connect(Input.action_release.bind("ui_right"))
 	var talk := _button("E\nГОВОРИТЬ", Vector2(-150, -142), Vector2(120, 106), true)
+	talk_button = talk
 	talk.pressed.connect(func(): library.try_talk())
 	book_button = _button("J\nКНИГА", Vector2(-282, -142), Vector2(120, 106), true)
 	book_button.pressed.connect(_toggle_book)
@@ -102,6 +104,7 @@ func set_mobile_enabled(value: bool) -> void:
 	mobile_enabled = value
 	if is_instance_valid(library) and is_instance_valid(library.controls):
 		library.controls.visible = not value and not library.dialogue.active and not library.book.active
+		library._update_travel_button()
 	_update_layout()
 
 func set_gameplay_visible(value: bool) -> void:
@@ -110,6 +113,9 @@ func set_gameplay_visible(value: bool) -> void:
 		Input.action_release("ui_left")
 		Input.action_release("ui_right")
 	_update_layout()
+
+func set_talk_visible(value: bool) -> void:
+	talk_button.visible = value
 
 func _toggle_book() -> void:
 	if not library.book.unlocked or library.dialogue.active:

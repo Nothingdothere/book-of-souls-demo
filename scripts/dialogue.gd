@@ -6,6 +6,7 @@ signal line_shown(speaker: String)
 signal soul_departure_requested(outcome: String)
 signal star_awarded
 signal topic_finished(character: String, topic: String)
+signal followup_finished
 
 const DATA_PATH := "res://dialogue/kas_intro.json"
 const PANEL := preload("res://assets/ui/dialogue/dialogue_panel_darkness.png")
@@ -42,6 +43,7 @@ var lina_resolved := false
 var lina_available := false
 var departed := false
 var awarded := false
+var followup_completed := false
 
 func _ready() -> void:
 	layer = 20
@@ -141,6 +143,8 @@ func _layout() -> void:
 func start(character := "kas") -> void:
 	if active or (character == "lina" and (lina_resolved or not lina_available)):
 		return
+	if character == "kas_return" and (not lina_resolved or followup_completed):
+		return
 	histories[conversation_id] = visited
 	conversation_id = character
 	visited = histories.get(character, {})
@@ -176,9 +180,9 @@ func _show_line() -> void:
 	current_speaker = line["speaker"]
 	portrait.visible = current_speaker in ["dark", "kas", "lina"]
 	portrait.texture = DARK if current_speaker == "dark" else LINA if current_speaker == "lina" else KAS
-	var on_right := current_speaker == "dark" if conversation_id == "kas" else current_speaker == "lina"
+	var on_right := current_speaker == "dark" if conversation_id.begins_with("kas") else current_speaker == "lina"
 	portrait.position.x = 806.0 if on_right else 94.0
-	portrait.flip_h = conversation_id == "kas"
+	portrait.flip_h = conversation_id.begins_with("kas")
 	speaker_label.text = {"dark": "ДАРК", "kas": "КАС", "lina": "ЛИНА"}.get(current_speaker, "")
 	if line.get("effect", "") == "depart":
 		_depart()
@@ -208,6 +212,9 @@ func is_revealing() -> bool:
 func skip_intro() -> void:
 	if not active or choosing or current_topic != "" or pending_outcome != "":
 		return
+	if conversation_id == "kas_return":
+		_finish_followup()
+		return
 	_show_choices()
 
 func advance() -> void:
@@ -226,10 +233,19 @@ func advance() -> void:
 		if pending_outcome != "":
 			close()
 			return
+		if conversation_id == "kas_return":
+			_finish_followup()
+			return
 		if current_topic != "":
 			visited[current_topic] = true
 			topic_finished.emit(conversation_id, current_topic)
 		_show_choices()
+
+func _finish_followup() -> void:
+	if not followup_completed:
+		followup_completed = true
+		followup_finished.emit()
+	close()
 
 func _button(text: String, callback: Callable, already_read := false) -> void:
 	var button := Button.new()
