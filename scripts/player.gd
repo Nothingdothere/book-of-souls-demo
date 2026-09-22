@@ -17,8 +17,8 @@ var footstep_player: AudioStreamPlayer
 var indoor_step: AudioStream
 var outdoor_step: AudioStream
 var outdoor_footsteps := false
-const FOOTSTEP_INTERVAL := 0.32
-var footstep_elapsed := FOOTSTEP_INTERVAL
+# Foot-contact poses in the 8-frame walk cycle (see PIVOTS below).
+const FOOTSTEP_FRAMES := [0, 4]
 
 func award_soul_star() -> void:
 	if has_soul_star:
@@ -37,6 +37,7 @@ func _ready() -> void:
 	hall_frames = artwork.sprite_frames
 	artwork.animation = "idle"
 	artwork.frame_changed.connect(_align_frame)
+	artwork.frame_changed.connect(_on_walk_frame)
 	artwork.animation_changed.connect(_align_frame)
 	_align_frame()
 	_setup_smoke_burst()
@@ -100,6 +101,11 @@ func dissolve_in(duration := 0.18) -> void:
 	tween.tween_property(contact_shadow, "modulate:a", 1.0, duration)
 	await tween.finished
 
+func _on_walk_frame() -> void:
+	if artwork.animation == &"walk" and artwork.frame in FOOTSTEP_FRAMES:
+		footstep_player.stream = outdoor_step if outdoor_footsteps else indoor_step
+		footstep_player.play()
+
 func _align_frame() -> void:
 	var pivot: Vector2 = PIVOTS[artwork.frame] if artwork.animation == &"walk" else NO_CAT_IDLE_PIVOT if without_cat else IDLE_PIVOT
 	var texture := artwork.sprite_frames.get_frame_texture(artwork.animation, artwork.frame)
@@ -141,19 +147,10 @@ func _physics_process(delta: float) -> void:
 		velocity.y = 0.0
 	move_and_slide()
 	position.x = clampf(position.x, left_boundary, right_boundary)
-	var walking := direction != 0.0 and absf(velocity.x) > 0.1
 	if direction != 0.0:
 		# Temporary reflection until separate left-facing drawings exist.
 		artwork.flip_h = direction < 0.0
-		artwork.play("walk" if walking else "idle")
+		artwork.play("walk" if absf(velocity.x) > 0.1 else "idle")
 	else:
 		artwork.play("idle")
 	_align_frame()
-	if walking and is_on_floor():
-		footstep_elapsed += delta
-		if footstep_elapsed >= FOOTSTEP_INTERVAL:
-			footstep_elapsed = 0.0
-			footstep_player.stream = outdoor_step if outdoor_footsteps else indoor_step
-			footstep_player.play()
-	else:
-		footstep_elapsed = FOOTSTEP_INTERVAL
