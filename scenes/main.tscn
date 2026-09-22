@@ -10,8 +10,8 @@
 [ext_resource type="PackedScene" path="res://scenes/kas.tscn" id="8"]
 [ext_resource type="PackedScene" path="res://scenes/dialogue.tscn" id="9"]
 
-[sub_resource type="WorldBoundaryShape2D" id="FloorShape"]
-distance = 100.0
+[sub_resource type="RectangleShape2D" id="FloorShape"]
+size = Vector2(1896, 200)
 
 [node name="Main" type="Node2D" unique_id=1185851889]
 script = ExtResource("2")

@@ -1,47 +1,62 @@
-[gd_scene load_steps=7 format=3]
+[gd_scene format=3 uid="uid://bl83iupxjq1c3"]
 
-[ext_resource type="Texture2D" path="res://assets/coffee/cafe_back.png" id="1"]
-[ext_resource type="Texture2D" path="res://assets/coffee/cafe_floor.png" id="2"]
-[ext_resource type="Texture2D" path="res://assets/coffee/cafe_midground.png" id="3"]
-[ext_resource type="Texture2D" path="res://assets/coffee/cafe_foreground.png" id="4"]
+[ext_resource type="Texture2D" uid="uid://dtwlwf6iu07oe" path="res://assets/coffee/cafe_back.png" id="1"]
+[ext_resource type="Texture2D" uid="uid://biuh2cseokcev" path="res://assets/coffee/cafe_floor.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://bi7njfhdihwfv" path="res://assets/coffee/cafe_midground.png" id="3"]
+[ext_resource type="Texture2D" uid="uid://b5vh3cdrl44ap" path="res://assets/coffee/cafe_foreground.png" id="4"]
 [ext_resource type="SpriteFrames" path="res://assets/cat/cat_frames.tres" id="5"]
-[ext_resource type="Script" path="res://scripts/coffee_cat.gd" id="6"]
+[ext_resource type="Script" uid="uid://cs4rynamxo2n" path="res://scripts/coffee_cat.gd" id="6"]
+[ext_resource type="Texture2D" uid="uid://be2qplev1nyeh" path="res://assets/character/no_cat/dark_idle_right_01.png" id="7"]
 
-[node name="Coffee" type="Node2D"]
+[node name="Coffee" type="Node2D" unique_id=887594117]
 
-[node name="Backdrop" type="Polygon2D" parent="."]
+[node name="Floor" type="Sprite2D" parent="." unique_id=658893596]
+z_index = -3
+position = Vector2(-31, 90)
+texture = ExtResource("2")
+centered = false
+
+[node name="Backdrop" type="Polygon2D" parent="." unique_id=1132433378]
 z_index = -20
 color = Color(0.129, 0.11, 0.106, 1)
 polygon = PackedVector2Array(0, -200, 1672, -200, 1672, 1100, 0, 1100)
 
-[node name="Wall" type="Sprite2D" parent="."]
+[node name="Wall" type="Sprite2D" parent="." unique_id=961850424]
 z_index = -12
 position = Vector2(0, -80)
 texture = ExtResource("1")
 centered = false
 
-[node name="Floor" type="Sprite2D" parent="."]
-z_index = -9
-position = Vector2(0, -80)
-texture = ExtResource("2")
-centered = false
-
-[node name="CounterAndShelves" type="Sprite2D" parent="."]
+[node name="CounterAndShelves" type="Sprite2D" parent="." unique_id=2032467711]
 z_index = -4
 position = Vector2(0, -80)
 texture = ExtResource("3")
 centered = false
 
-[node name="CatOnCounter" type="AnimatedSprite2D" parent="."]
+[node name="CatOnCounter" type="AnimatedSprite2D" parent="." unique_id=666134070]
 z_index = -2
-position = Vector2(1350, 424)
-scale = Vector2(0.42, 0.42)
+position = Vector2(1162.88, 455.63)
+scale = Vector2(0.2846875, 0.27199218)
 sprite_frames = ExtResource("5")
 animation = &"blink"
+frame_progress = 0.32850543
 script = ExtResource("6")
 
-[node name="Foreground" type="Sprite2D" parent="."]
+[node name="Foreground" type="Sprite2D" parent="." unique_id=1757513939]
 z_index = 5
-position = Vector2(0, -80)
+position = Vector2(-27, -89)
+scale = Vector2(1.0143541, 0.9851222)
 texture = ExtResource("4")
 centered = false
+
+[node name="CoffeeSpawn" type="Marker2D" parent="." unique_id=140756762]
+editor_description = "Передвигайте узел, чтобы изменить место появления Дарка в кофейне. Масштаб дочернего DarkPreview задаёт его размер здесь."
+position = Vector2(1080, 771)
+
+[node name="DarkPreview" type="Sprite2D" parent="CoffeeSpawn" unique_id=496091799]
+editor_description = "Предпросмотр Дарка без кошки. Scale меняет размер в кофейне, Position — вертикальное совмещение с полом. В игре макет скрывается."
+z_index = 1
+position = Vector2(-93.32666, -11.126242)
+scale = Vector2(0.4375879, 0.41526046)
+texture = ExtResource("7")
+offset = Vector2(-38, -744)

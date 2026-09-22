@@ -10,6 +10,7 @@ var has_soul_star := false
 var hall_frames: SpriteFrames
 var no_cat_frames: SpriteFrames
 var without_cat := false
+var visual_offset := Vector2.ZERO
 
 func award_soul_star() -> void:
 	if has_soul_star:
@@ -21,14 +22,12 @@ func award_soul_star() -> void:
 
 # Source-space hip centres and sole baselines. Original PNGs stay intact.
 const PIVOTS := [Vector2(554, 1460), Vector2(546, 1437), Vector2(560, 1451), Vector2(575, 1430), Vector2(588, 1455), Vector2(549, 1457), Vector2(555, 1451), Vector2(560, 1444)]
-const ART_SCALE := 0.285
 const IDLE_PIVOT := Vector2(550, 1479)
 const NO_CAT_IDLE_PIVOT := Vector2(550, 1512)
 
 func _ready() -> void:
 	hall_frames = artwork.sprite_frames
 	artwork.animation = "idle"
-	artwork.scale = Vector2.ONE * ART_SCALE
 	artwork.frame_changed.connect(_align_frame)
 	artwork.animation_changed.connect(_align_frame)
 	_align_frame()
@@ -39,7 +38,7 @@ func _align_frame() -> void:
 	var drawing_offset := Vector2(texture.get_width() * 0.5 - pivot.x, texture.get_height() * 0.5 - pivot.y)
 	if artwork.flip_h:
 		drawing_offset.x = -drawing_offset.x
-	artwork.position = drawing_offset * ART_SCALE
+	artwork.position = drawing_offset * artwork.scale + visual_offset
 
 func set_without_cat(value: bool) -> void:
 	if without_cat == value:

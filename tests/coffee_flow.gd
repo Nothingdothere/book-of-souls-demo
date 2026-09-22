@@ -61,6 +61,8 @@ func verify() -> void:
 	scene.travel_button.pressed.emit()
 	check(scene.location == "cafe" and scene.coffee_world.visible, "Coffee location did not load")
 	check(scene.coffee_interior.scene_file_path.ends_with("coffee.tscn") and scene.coffee_street.scene_file_path.ends_with("street.tscn"), "Editable scenes are not used by gameplay")
+	check(not scene.coffee_interior.get_node("CoffeeSpawn/DarkPreview").visible, "Coffee editor preview appeared in the game")
+	check(scene.player.artwork.scale == scene.coffee_interior.get_node("CoffeeSpawn/DarkPreview").scale, "Coffee character scale ignored the scene preview")
 	check(scene.player.without_cat and not scene.kas.visible, "Hall actors did not switch")
 	check(scene.player.artwork.sprite_frames.get_frame_texture(&"idle", 0).get_size() == Vector2(1024, 1536), "No-cat idle canvas was not fixed")
 	var cat: AnimatedSprite2D = scene.coffee_interior.get_node("CatOnCounter")
@@ -68,10 +70,22 @@ func verify() -> void:
 	check("зал распределения" in scene.travel_button.text, "Return button text incorrect")
 	check(not scene.mobile_controls.talk_button.visible, "Talk button should not appear away from hall")
 	scene.player.position.x = 305
-	await process_frame
-	check(scene.location == "street" and scene.coffee_street.visible, "Walking left did not lead outdoors")
+	for frame in range(3):
+		await process_frame
+	check(scene.location == "street" and scene.coffee_street.visible, "Walking left did not lead outdoors (location=%s, x=%.1f)" % [scene.location, scene.player.position.x])
+	check(not scene.coffee_street.get_node("PlayerSpawn/DarkPreview").visible, "Street editor preview appeared in the game")
+	check(scene.player.artwork.scale == scene.coffee_street.get_node("PlayerSpawn/DarkPreview").scale, "Street character scale ignored the scene preview")
+	check(scene.player.position.x < 2000 and scene.camera.limit_left < 0, "Street still starts at its old right edge or blocks travel left")
+	scene.coffee_street.call("ensure_visible", -8000.0)
+	var extension_found := false
+	for child in scene.coffee_street.get_children():
+		if child is Sprite2D and child.position.x < -8000.0 and child.z_index in [-10, -8]:
+			extension_found = true
+			break
+	check(extension_found, "Houses do not continue left of the edited street scene")
 	scene.player.position.x = 2375
-	await process_frame
+	for frame in range(3):
+		await process_frame
 	check(scene.location == "cafe" and scene.coffee_interior.visible, "Walking back did not enter cafe")
 	scene.travel_button.pressed.emit()
 	check(scene.location == "hall" and scene.player.position.distance_to(saved_position) < 1.0, "Return to hall did not restore position")

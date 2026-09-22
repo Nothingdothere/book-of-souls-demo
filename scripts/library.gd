@@ -21,6 +21,7 @@ var mobile_controls: CanvasLayer
 var coffee_world: Node2D
 var coffee_interior: Node2D
 var coffee_street: Node2D
+var default_player_art_scale := Vector2(0.285, 0.285)
 var travel_button: Button
 var location := "hall"
 var hall_position := Vector2(687, 771)
@@ -29,6 +30,7 @@ var quest_toast: Label
 var quest_toast_shown := false
 
 func _ready() -> void:
+	default_player_art_scale = player.get_node("Artwork").scale
 	# The level may be adjusted in the editor, but the walkable floor must
 	# continue under every repeated room tile.
 	var floor_collision: CollisionShape2D = $Ground/CollisionShape2D
@@ -59,6 +61,7 @@ func _ready() -> void:
 	coffee_street = preload("res://scenes/street.tscn").instantiate()
 	coffee_world.add_child(coffee_interior)
 	coffee_world.add_child(coffee_street)
+	coffee_interior.get_node("CoffeeSpawn/DarkPreview").hide()
 	coffee_world.hide()
 	coffee_street.hide()
 	_create_travel_button()
@@ -102,9 +105,12 @@ func _ready() -> void:
 
 func _process(_delta: float) -> void:
 	if location == "cafe" and player.position.x < 310.0:
-		_set_location("street", Vector2(2260, 771))
+		_set_location("street", coffee_street.get_node("PlayerSpawn").position)
 	elif location == "street" and player.position.x > 2370.0:
 		_set_location("cafe", Vector2(430, 771))
+	if location == "street":
+		var view_width := get_viewport().get_visible_rect().size.x / camera.zoom.x
+		coffee_street.call("ensure_visible", player.position.x - view_width * 0.5)
 	if location == "hall":
 		_update_environment()
 	kas.prompt.visible = location == "hall" and not dialogue.active and not book.active and absf(player.position.x - kas.position.x) <= TALK_DISTANCE
@@ -275,7 +281,7 @@ func travel() -> void:
 		hall_position = player.position
 		point_visited = true
 		quest_label.text = "Задание выполнено: вернуться в Точку"
-		_set_location("cafe", Vector2(1080, 771))
+		_set_location("cafe", coffee_interior.get_node("CoffeeSpawn").position)
 	else:
 		_set_location("hall", hall_position)
 
@@ -290,12 +296,18 @@ func _set_location(destination: String, spawn: Vector2) -> void:
 	coffee_world.visible = not in_hall
 	coffee_interior.visible = destination == "cafe"
 	coffee_street.visible = destination == "street"
+	var art_sprite: AnimatedSprite2D = player.get_node("Artwork")
+	var preview: Sprite2D = coffee_street.get_node("PlayerSpawn/DarkPreview") if destination == "street" else coffee_interior.get_node("CoffeeSpawn/DarkPreview") if destination == "cafe" else null
+	art_sprite.scale = preview.scale if preview != null else default_player_art_scale
+	player.visual_offset = preview.position if preview != null else Vector2.ZERO
+	player.get_node("ContactShadow").position = Vector2(0, -1) + player.visual_offset
 	player.set_without_cat(not in_hall)
+	player.call("_align_frame")
 	player.position = spawn
 	player.velocity = Vector2.ZERO
-	player.left_boundary = 155.0 if in_hall else 100.0
-	player.right_boundary = INF if in_hall else 1530.0 if destination == "cafe" else 2580.0
-	camera.limit_left = 0
+	player.left_boundary = -100000000.0 if destination == "street" else 155.0 if in_hall else 100.0
+	player.right_boundary = INF if in_hall or destination == "street" else 1530.0
+	camera.limit_left = -100000000 if destination == "street" else 0
 	camera.limit_right = 10000000 if in_hall else 1672 if destination == "cafe" else 2700
 	camera.reset_smoothing()
 	controls.text = "A / D, стрелки — идти     ·     E — поговорить" if in_hall else "A / D, стрелки — идти"

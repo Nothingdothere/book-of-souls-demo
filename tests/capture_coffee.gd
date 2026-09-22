@@ -22,6 +22,8 @@ func capture() -> void:
 	await shot("02_street_entrance")
 	scene.player.position.x = 1050
 	await shot("03_street_houses")
+	scene.player.position.x = -1800
+	await shot("05_street_extension")
 	scene._set_location("cafe", Vector2(1080, 771))
 	scene.mobile_controls.set_mobile_enabled(true)
 	await shot("04_mobile_interior")
