@@ -21,8 +21,8 @@ color = Color(0.04, 0.035, 0.025, 0.16)
 polygon = PackedVector2Array(-40, 0, -28, -4, 0, -5, 28, -4, 40, 0, 28, 4, 0, 5, -28, 4)
 
 [node name="Artwork" type="AnimatedSprite2D" parent="." unique_id=1206675578]
-position = Vector2(-13.539988, -191.11)
-scale = Vector2(0.31144533, 0.30483073)
+position = Vector2(-4.5000134, -181.61)
+scale = Vector2(0.32910153, 0.3172005)
 sprite_frames = ExtResource("2")
 animation = &"front"
 

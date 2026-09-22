@@ -27,8 +27,8 @@ centered = false
 
 [node name="DistantHouses" type="Sprite2D" parent="." unique_id=1683040759]
 z_index = -13
-position = Vector2(0, -80)
-scale = Vector2(1.42, 1.14)
+position = Vector2(0, -194)
+scale = Vector2(1.42, 1.2788551)
 texture = ExtResource("2")
 centered = false
 
