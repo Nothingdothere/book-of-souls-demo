@@ -1,0 +1,63 @@
+[gd_scene load_steps=8 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/coffee/street_parallax.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/coffee/street_far_buildings.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/coffee/street_more_buildings.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/coffee/street_back.png" id="4"]
+[ext_resource type="Texture2D" path="res://assets/coffee/street_ground.png" id="5"]
+[ext_resource type="Texture2D" path="res://assets/coffee/cafe_exterior.png" id="6"]
+[ext_resource type="Texture2D" path="res://assets/coffee/street_foreground.png" id="7"]
+
+[node name="Street" type="Node2D"]
+
+[node name="Backdrop" type="Polygon2D" parent="."]
+z_index = -20
+color = Color(0.063, 0.078, 0.11, 1)
+polygon = PackedVector2Array(0, -200, 2700, -200, 2700, 1100, 0, 1100)
+
+[node name="DistantAlley" type="Sprite2D" parent="."]
+z_index = -15
+position = Vector2(0, -80)
+scale = Vector2(1.62, 1)
+texture = ExtResource("1")
+centered = false
+
+[node name="DistantHouses" type="Sprite2D" parent="."]
+z_index = -13
+position = Vector2(0, -80)
+scale = Vector2(1.42, 1.14)
+texture = ExtResource("2")
+centered = false
+
+[node name="LeftHouses" type="Sprite2D" parent="."]
+z_index = -10
+position = Vector2(0, -80)
+texture = ExtResource("3")
+centered = false
+
+[node name="RightHouses" type="Sprite2D" parent="."]
+z_index = -8
+position = Vector2(770, -80)
+texture = ExtResource("4")
+centered = false
+
+[node name="Pavement" type="Sprite2D" parent="."]
+z_index = -5
+position = Vector2(0, 110)
+scale = Vector2(1.62, 1)
+texture = ExtResource("5")
+centered = false
+
+[node name="CoffeeExterior" type="Sprite2D" parent="."]
+z_index = -3
+position = Vector2(1750, 105)
+scale = Vector2(0.65, 0.65)
+texture = ExtResource("6")
+centered = false
+
+[node name="NearSilhouettes" type="Sprite2D" parent="."]
+z_index = 5
+position = Vector2(0, -80)
+scale = Vector2(1.42, 1.14)
+texture = ExtResource("7")
+centered = false

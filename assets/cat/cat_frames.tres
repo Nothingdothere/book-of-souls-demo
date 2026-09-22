@@ -1,0 +1,33 @@
+[gd_resource type="SpriteFrames" load_steps=14 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/cat/blink/01.png" id="b1"]
+[ext_resource type="Texture2D" path="res://assets/cat/blink/02.png" id="b2"]
+[ext_resource type="Texture2D" path="res://assets/cat/blink/03.png" id="b3"]
+[ext_resource type="Texture2D" path="res://assets/cat/blink/04.png" id="b4"]
+[ext_resource type="Texture2D" path="res://assets/cat/wash/01.png" id="w1"]
+[ext_resource type="Texture2D" path="res://assets/cat/wash/02.png" id="w2"]
+[ext_resource type="Texture2D" path="res://assets/cat/wash/03.png" id="w3"]
+[ext_resource type="Texture2D" path="res://assets/cat/wash/04.png" id="w4"]
+[ext_resource type="Texture2D" path="res://assets/cat/paw/01.png" id="p1"]
+[ext_resource type="Texture2D" path="res://assets/cat/paw/02.png" id="p2"]
+[ext_resource type="Texture2D" path="res://assets/cat/paw/03.png" id="p3"]
+[ext_resource type="Texture2D" path="res://assets/cat/paw/04.png" id="p4"]
+[ext_resource type="Texture2D" path="res://assets/cat/paw/05.png" id="p5"]
+
+[resource]
+animations = [{
+"frames": [{"duration": 1.0, "texture": ExtResource("b1")}, {"duration": 1.0, "texture": ExtResource("b2")}, {"duration": 1.0, "texture": ExtResource("b3")}, {"duration": 1.0, "texture": ExtResource("b4")}],
+"loop": true,
+"name": &"blink",
+"speed": 2.4
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("p1")}, {"duration": 1.0, "texture": ExtResource("p2")}, {"duration": 1.0, "texture": ExtResource("p3")}, {"duration": 1.0, "texture": ExtResource("p4")}, {"duration": 1.0, "texture": ExtResource("p5")}],
+"loop": true,
+"name": &"paw",
+"speed": 3.0
+}, {
+"frames": [{"duration": 1.0, "texture": ExtResource("w1")}, {"duration": 1.0, "texture": ExtResource("w2")}, {"duration": 1.0, "texture": ExtResource("w3")}, {"duration": 1.0, "texture": ExtResource("w4")}],
+"loop": true,
+"name": &"wash",
+"speed": 3.0
+}]

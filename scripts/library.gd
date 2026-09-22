@@ -19,6 +19,8 @@ var quest_label: Label
 var book_hint: Label
 var mobile_controls: CanvasLayer
 var coffee_world: Node2D
+var coffee_interior: Node2D
+var coffee_street: Node2D
 var travel_button: Button
 var location := "hall"
 var hall_position := Vector2(687, 771)
@@ -51,9 +53,14 @@ func _ready() -> void:
 	controls.text = "A / D, стрелки — идти     ·     E — поговорить"
 	controls.visible = not mobile_controls.mobile_enabled
 	coffee_world = Node2D.new()
-	coffee_world.name = "CoffeeWorld"
-	coffee_world.set_script(preload("res://scripts/coffee_world.gd"))
+	coffee_world.name = "PointWorld"
 	add_child(coffee_world)
+	coffee_interior = preload("res://scenes/coffee.tscn").instantiate()
+	coffee_street = preload("res://scenes/street.tscn").instantiate()
+	coffee_world.add_child(coffee_interior)
+	coffee_world.add_child(coffee_street)
+	coffee_world.hide()
+	coffee_street.hide()
 	_create_travel_button()
 	_create_quest_toast()
 	quest_label = _hud_label(Vector2(26, 60), 18)
@@ -281,8 +288,8 @@ func _set_location(destination: String, spawn: Vector2) -> void:
 	lina.visible = in_hall
 	kas.get_node("Body/CollisionShape2D").set_deferred("disabled", not in_hall)
 	coffee_world.visible = not in_hall
-	if not in_hall:
-		coffee_world.set_zone(destination)
+	coffee_interior.visible = destination == "cafe"
+	coffee_street.visible = destination == "street"
 	player.set_without_cat(not in_hall)
 	player.position = spawn
 	player.velocity = Vector2.ZERO

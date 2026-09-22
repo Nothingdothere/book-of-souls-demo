@@ -1,0 +1,47 @@
+[gd_scene load_steps=7 format=3]
+
+[ext_resource type="Texture2D" path="res://assets/coffee/cafe_back.png" id="1"]
+[ext_resource type="Texture2D" path="res://assets/coffee/cafe_floor.png" id="2"]
+[ext_resource type="Texture2D" path="res://assets/coffee/cafe_midground.png" id="3"]
+[ext_resource type="Texture2D" path="res://assets/coffee/cafe_foreground.png" id="4"]
+[ext_resource type="SpriteFrames" path="res://assets/cat/cat_frames.tres" id="5"]
+[ext_resource type="Script" path="res://scripts/coffee_cat.gd" id="6"]
+
+[node name="Coffee" type="Node2D"]
+
+[node name="Backdrop" type="Polygon2D" parent="."]
+z_index = -20
+color = Color(0.129, 0.11, 0.106, 1)
+polygon = PackedVector2Array(0, -200, 1672, -200, 1672, 1100, 0, 1100)
+
+[node name="Wall" type="Sprite2D" parent="."]
+z_index = -12
+position = Vector2(0, -80)
+texture = ExtResource("1")
+centered = false
+
+[node name="Floor" type="Sprite2D" parent="."]
+z_index = -9
+position = Vector2(0, -80)
+texture = ExtResource("2")
+centered = false
+
+[node name="CounterAndShelves" type="Sprite2D" parent="."]
+z_index = -4
+position = Vector2(0, -80)
+texture = ExtResource("3")
+centered = false
+
+[node name="CatOnCounter" type="AnimatedSprite2D" parent="."]
+z_index = -2
+position = Vector2(1350, 424)
+scale = Vector2(0.42, 0.42)
+sprite_frames = ExtResource("5")
+animation = &"blink"
+script = ExtResource("6")
+
+[node name="Foreground" type="Sprite2D" parent="."]
+z_index = 5
+position = Vector2(0, -80)
+texture = ExtResource("4")
+centered = false
