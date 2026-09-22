@@ -17,6 +17,13 @@ func finish_lines(dialogue: Node) -> void:
 		guard += 1
 	check(guard < 200, "Dialogue did not finish")
 
+func finish_travel(scene: Node) -> void:
+	var guard := 0
+	while scene.transitioning and guard < 200:
+		await process_frame
+		guard += 1
+	check(guard < 200, "Travel transition did not finish")
+
 func verify() -> void:
 	var scene = load("res://scenes/main.tscn").instantiate()
 	root.add_child(scene)
@@ -59,6 +66,7 @@ func verify() -> void:
 	scene.mobile_controls.set_mobile_enabled(true)
 	check(scene.travel_button.visible and scene.travel_button.text == "В кофейню", "Mobile travel button missing")
 	scene.travel_button.pressed.emit()
+	await finish_travel(scene)
 	check(scene.location == "cafe" and scene.coffee_world.visible, "Coffee location did not load")
 	check(dialogue.active and dialogue.conversation_id == "point", "Point greeting did not open on first arrival")
 	finish_lines(dialogue)
@@ -96,7 +104,8 @@ func verify() -> void:
 	check(scene.location == "cafe" and scene.coffee_interior.visible, "Walking back did not enter cafe")
 	check(scene.player.without_cat and cat.is_visible_in_tree(), "Cat did not return to the coffee counter")
 	scene.travel_button.pressed.emit()
-	check(scene.location == "hall" and scene.player.position.distance_to(saved_position) < 1.0, "Return to hall did not restore position")
+	await finish_travel(scene)
+	check(scene.location == "hall" and absf(scene.player.position.x - saved_position.x) < 1.0, "Return to hall did not restore position")
 	check(is_equal_approx(scene.camera.zoom.x, 1.0), "Hall camera zoom was not restored")
 	check(not scene.player.without_cat and scene.kas.visible and scene.travel_button.visible, "Hall state was not restored")
 	check(scene.mobile_controls.talk_button.visible, "Talk button did not return in hall")

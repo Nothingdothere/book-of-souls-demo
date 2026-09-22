@@ -5,12 +5,14 @@ extends CharacterBody2D
 @export var left_boundary: float = 155.0
 @export var right_boundary: float = INF
 @onready var artwork: AnimatedSprite2D = $Artwork
+@onready var contact_shadow: Node2D = $ContactShadow
 var controls_locked := false
 var has_soul_star := false
 var hall_frames: SpriteFrames
 var no_cat_frames: SpriteFrames
 var without_cat := false
 var visual_offset := Vector2.ZERO
+var smoke_burst: CPUParticles2D
 
 func award_soul_star() -> void:
 	if has_soul_star:
@@ -31,6 +33,62 @@ func _ready() -> void:
 	artwork.frame_changed.connect(_align_frame)
 	artwork.animation_changed.connect(_align_frame)
 	_align_frame()
+	_setup_smoke_burst()
+
+func _setup_smoke_burst() -> void:
+	var puff_gradient := Gradient.new()
+	puff_gradient.set_color(0, Color(1, 1, 1, 1))
+	puff_gradient.set_color(1, Color(1, 1, 1, 0))
+	var puff_texture := GradientTexture2D.new()
+	puff_texture.gradient = puff_gradient
+	puff_texture.fill = GradientTexture2D.FILL_RADIAL
+	puff_texture.fill_from = Vector2(0.5, 0.5)
+	puff_texture.fill_to = Vector2(1.0, 0.5)
+	puff_texture.width = 64
+	puff_texture.height = 64
+	smoke_burst = CPUParticles2D.new()
+	smoke_burst.name = "SmokeBurst"
+	smoke_burst.texture = puff_texture
+	smoke_burst.emitting = false
+	smoke_burst.one_shot = true
+	smoke_burst.amount = 28
+	smoke_burst.lifetime = 0.6
+	smoke_burst.explosiveness = 0.85
+	smoke_burst.direction = Vector2.UP
+	smoke_burst.spread = 100.0
+	smoke_burst.gravity = Vector2(0, -55)
+	smoke_burst.initial_velocity_min = 35.0
+	smoke_burst.initial_velocity_max = 100.0
+	smoke_burst.scale_amount_min = 0.7
+	smoke_burst.scale_amount_max = 1.6
+	smoke_burst.color = Color(0.04, 0.035, 0.05, 0.85)
+	var fade := Gradient.new()
+	fade.set_color(0, Color(0.04, 0.035, 0.05, 0.85))
+	fade.set_color(1, Color(0.04, 0.035, 0.05, 0.0))
+	smoke_burst.color_ramp = fade
+	smoke_burst.position = Vector2(0, -150)
+	# Global coords: an in-flight puff must not snap to the new spot when
+	# _set_location teleports the player mid-transition.
+	smoke_burst.local_coords = false
+	add_child(smoke_burst)
+
+func dissolve_out(duration := 0.18) -> void:
+	smoke_burst.restart()
+	smoke_burst.emitting = true
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(artwork, "modulate:a", 0.0, duration)
+	tween.tween_property(contact_shadow, "modulate:a", 0.0, duration)
+	await tween.finished
+
+func dissolve_in(duration := 0.18) -> void:
+	smoke_burst.restart()
+	smoke_burst.emitting = true
+	var tween := create_tween()
+	tween.set_parallel(true)
+	tween.tween_property(artwork, "modulate:a", 1.0, duration)
+	tween.tween_property(contact_shadow, "modulate:a", 1.0, duration)
+	await tween.finished
 
 func _align_frame() -> void:
 	var pivot: Vector2 = PIVOTS[artwork.frame] if artwork.animation == &"walk" else NO_CAT_IDLE_PIVOT if without_cat else IDLE_PIVOT

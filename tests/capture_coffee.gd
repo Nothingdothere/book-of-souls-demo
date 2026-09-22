@@ -15,7 +15,7 @@ func capture() -> void:
 	root.add_child(scene)
 	scene.dialogue.followup_completed = true
 	scene._followup_finished()
-	scene.travel()
+	await scene.travel()
 	await shot("01_interior")
 	scene.player.position.x = 305
 	await process_frame

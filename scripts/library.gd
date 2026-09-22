@@ -26,6 +26,7 @@ var travel_button: Button
 var location := "hall"
 var hall_position := Vector2(687, 771)
 var point_visited := false
+var transitioning := false
 var quest_toast: Label
 var quest_toast_shown := false
 
@@ -126,7 +127,7 @@ func _update_environment() -> void:
 		art.update(camera.get_screen_center_position().x, view_width)
 
 func try_talk() -> void:
-	if book.active or location != "hall":
+	if book.active or location != "hall" or transitioning:
 		return
 	if not dialogue.active and absf(player.position.x - kas.position.x) <= TALK_DISTANCE:
 		dialogue.start("kas_return" if dialogue.lina_resolved and not dialogue.followup_completed else "kas")
@@ -259,7 +260,7 @@ func _create_quest_toast() -> void:
 func _update_travel_button() -> void:
 	if travel_button == null:
 		return
-	travel_button.visible = dialogue.followup_completed and not dialogue.active and not book.active
+	travel_button.visible = dialogue.followup_completed and not dialogue.active and not book.active and not transitioning
 	if mobile_controls.mobile_enabled:
 		travel_button.offset_left = -240
 		travel_button.offset_right = -14
@@ -276,18 +277,27 @@ func _update_travel_button() -> void:
 		travel_button.text = "Переместиться в кофейню" if location == "hall" else "Переместиться в зал распределения"
 
 func travel() -> void:
-	if not dialogue.followup_completed or dialogue.active or book.active:
+	if not dialogue.followup_completed or dialogue.active or book.active or transitioning:
 		return
+	transitioning = true
+	player.controls_locked = true
+	_update_travel_button()
+	await player.dissolve_out()
+	var first_visit := false
 	if location == "hall":
 		hall_position = player.position
-		var first_visit := not point_visited
+		first_visit = not point_visited
 		point_visited = true
 		quest_label.text = "Задание выполнено: вернуться в Точку"
 		_set_location("cafe", coffee_interior.get_node("CoffeeSpawn").position)
-		if first_visit:
-			dialogue.start("point")
 	else:
 		_set_location("hall", hall_position)
+	await player.dissolve_in()
+	player.controls_locked = false
+	transitioning = false
+	_update_travel_button()
+	if first_visit:
+		dialogue.start("point")
 
 func _set_location(destination: String, spawn: Vector2) -> void:
 	location = destination
@@ -325,7 +335,7 @@ func _set_location(destination: String, spawn: Vector2) -> void:
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_J:
-		if not dialogue.active:
+		if not dialogue.active and not transitioning:
 			if book.active:
 				book.close()
 			else:
