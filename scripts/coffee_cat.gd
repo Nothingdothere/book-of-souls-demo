@@ -13,11 +13,12 @@ func _ready() -> void:
 	rng.randomize()
 	purr_player = AudioStreamPlayer.new()
 	purr_player.stream = load("res://assets/audio/sfx/cat_purr.wav")
-	purr_player.volume_db = -6.0
+	purr_player.volume_db = -26.0
 	purr_player.finished.connect(func(): if is_visible_in_tree(): purr_player.play())
 	add_child(purr_player)
 	meow_player = AudioStreamPlayer.new()
 	meow_player.stream = load("res://assets/audio/sfx/cat_meow.wav")
+	meow_player.volume_db = -16.0
 	add_child(meow_player)
 	_schedule_meow()
 

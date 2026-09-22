@@ -8,6 +8,7 @@
 [ext_resource type="Script" uid="uid://cs4rynamxo2n" path="res://scripts/coffee_cat.gd" id="6"]
 [ext_resource type="Texture2D" uid="uid://be2qplev1nyeh" path="res://assets/character/no_cat/dark_idle_right_01.png" id="7"]
 [ext_resource type="Script" uid="uid://3whr03cn68q0" path="res://scripts/coffee.gd" id="8"]
+[ext_resource type="Script" path="res://scripts/coffee_hotspot.gd" id="9"]
 
 [node name="Coffee" type="Node2D" unique_id=887594117]
 script = ExtResource("8")
@@ -64,3 +65,28 @@ position = Vector2(-207.83473, 103.0671)
 scale = Vector2(0.5203005, 0.43655235)
 texture = ExtResource("7")
 offset = Vector2(-38, -744)
+
+[node name="HotspotMachine" type="Area2D" parent="." unique_id=531713363]
+editor_description = "Кликабельная точка (будущий апгрейд кофейни): эспрессомашина. Двигайте узел, чтобы точнее совместить с картинкой."
+position = Vector2(772, 384)
+script = ExtResource("9")
+
+[node name="HotspotGarland" type="Area2D" parent="." unique_id=775393670]
+editor_description = "Кликабельная точка (будущий апгрейд кофейни): полка/гирлянда."
+position = Vector2(639, 171)
+script = ExtResource("9")
+
+[node name="HotspotWall" type="Area2D" parent="." unique_id=304381719]
+editor_description = "Кликабельная точка (будущий апгрейд кофейни): трещина в стене."
+position = Vector2(312, 358)
+script = ExtResource("9")
+
+[node name="HotspotCat" type="Area2D" parent="." unique_id=977348842]
+editor_description = "Кликабельная точка (будущий апгрейд кофейни): подушечка для Куро."
+position = Vector2(1163, 430)
+script = ExtResource("9")
+
+[node name="HotspotBackroom" type="Area2D" parent="." unique_id=129297294]
+editor_description = "Кликабельная точка (будущий апгрейд кофейни): подсобка/кабинет."
+position = Vector2(206, 284)
+script = ExtResource("9")

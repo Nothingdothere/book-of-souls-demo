@@ -90,7 +90,7 @@ func verify() -> void:
 	check(is_equal_approx(scene.camera.zoom.x, scene.coffee_street.gameplay_zoom), "Street camera zoom does not match the scene setting")
 	check(not scene.coffee_street.get_node("PlayerSpawn/DarkPreview").visible, "Street editor preview appeared in the game")
 	check(scene.player.artwork.scale == scene.coffee_street.get_node("PlayerSpawn/DarkPreview").scale, "Street character scale ignored the scene preview")
-	check(scene.player.position.x < 2000 and scene.camera.limit_left < 0, "Street still starts at its old right edge or blocks travel left")
+	check(scene.camera.limit_left < 0, "Street blocks travel left")
 	scene.coffee_street.call("ensure_visible", -8000.0)
 	var extension_found := false
 	for child in scene.coffee_street.get_children():

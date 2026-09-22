@@ -7,6 +7,7 @@ var unlocked := false
 var active := false
 var turning := false
 var lina_known := false
+var diana_known := false
 var page := 0
 var target_page := 0
 var turn_elapsed := 0.0
@@ -25,9 +26,17 @@ var previous: Button
 var next: Button
 var handwriting: Font
 var page_turn_sfx: AudioStreamPlayer
+var page_turn_rng := RandomNumberGenerator.new()
+const PAGE_TURN_VOLUME := -16.0
+# Softens the sample's own end-of-clip click rather than trying to trim the
+# source file. -24dB over 150ms still let the click poke through, so this
+# fades earlier, longer, and further down.
+const PAGE_TURN_FADE_LEAD := 0.3
+const PAGE_TURN_FADE_DROP := 40.0
 
 func _ready() -> void:
 	layer = 30
+	page_turn_rng.randomize()
 	page_turn_sfx = AudioStreamPlayer.new()
 	page_turn_sfx.stream = load("res://assets/audio/sfx/book_flip.ogg")
 	add_child(page_turn_sfx)
@@ -133,6 +142,8 @@ func _layout() -> void:
 	stage.position = (size - Vector2(1536, 1024) * factor) * 0.5
 
 func page_count() -> int:
+	if diana_known:
+		return 5
 	return 4 if lina_known else 3
 
 func open() -> void:
@@ -167,13 +178,25 @@ func _show_page() -> void:
 	previous.disabled = page == 0
 	next.disabled = page == page_count() - 1
 
+func _play_page_turn() -> void:
+	# A single sample played identically every time reads as a loop, and its
+	# tail has an audible click — jitter pitch/volume per turn and fade the
+	# last stretch out instead of letting it ring to the end.
+	page_turn_sfx.pitch_scale = 1.0 + page_turn_rng.randf_range(-0.08, 0.08)
+	page_turn_sfx.volume_db = PAGE_TURN_VOLUME + page_turn_rng.randf_range(-2.0, 2.0)
+	page_turn_sfx.play()
+	var fade := create_tween()
+	var lead_in: float = maxf(0.0, page_turn_sfx.stream.get_length() / page_turn_sfx.pitch_scale - PAGE_TURN_FADE_LEAD)
+	fade.tween_interval(lead_in)
+	fade.tween_property(page_turn_sfx, "volume_db", page_turn_sfx.volume_db - PAGE_TURN_FADE_DROP, PAGE_TURN_FADE_LEAD)
+
 func turn(direction: int) -> void:
 	if not active or turning or page + direction < 0 or page + direction >= page_count():
 		return
 	target_page = page + direction
 	turn_elapsed = 0.0
 	turning = true
-	page_turn_sfx.play()
+	_play_page_turn()
 	contents.hide()
 	previous.disabled = true
 	next.disabled = true

@@ -26,6 +26,10 @@ var travel_button: Button
 var location := "hall"
 var hall_position := Vector2(687, 771)
 var point_visited := false
+var walk_quest_active := false
+var diana_met := false
+var diana: Node2D
+var hotspots: Array = []
 var transitioning := false
 var quest_toast: Label
 var quest_toast_shown := false
@@ -69,6 +73,16 @@ func _ready() -> void:
 	coffee_interior.get_node("CoffeeSpawn/DarkPreview").hide()
 	coffee_world.hide()
 	coffee_street.hide()
+	diana = coffee_street.get_node("Diana")
+	# Street content sits in the same world space as the hall (only hidden,
+	# not offset), so her blocking collision must start disabled or it walls
+	# off part of the hall floor before the player ever visits the street.
+	diana.get_node("Body/CollisionShape2D").disabled = true
+	_connect_hotspot("HotspotMachine", "coffee_hotspot_machine")
+	_connect_hotspot("HotspotGarland", "coffee_hotspot_garland")
+	_connect_hotspot("HotspotWall", "coffee_hotspot_wall")
+	_connect_hotspot("HotspotCat", "coffee_hotspot_cat")
+	_connect_hotspot("HotspotBackroom", "coffee_hotspot_backroom")
 	_create_travel_button()
 	_create_quest_toast()
 	quest_label = _hud_label(Vector2(26, 60), 18)
@@ -108,13 +122,16 @@ func _ready() -> void:
 	repeating_layers.append(RepeatingArt.new(tables))
 	_update_environment()
 	_setup_audio()
+	if OS.is_debug_build():
+		var dev_panel := CanvasLayer.new()
+		dev_panel.set_script(preload("res://scripts/dev_panel.gd"))
+		add_child(dev_panel)
 
 func _setup_audio() -> void:
-	# -20dB ~= -50% loudness on top of the original quiet mix.
-	hall_music = _looping_player("res://assets/audio/music/hall_theme.mp3", -20.0)
-	point_music = _looping_player("res://assets/audio/music/point_theme.mp3", -20.0)
-	door_sfx = _sfx_player("res://assets/audio/sfx/door_open.ogg")
-	bell_sfx = _sfx_player("res://assets/audio/sfx/shop_bell.wav")
+	hall_music = _looping_player("res://assets/audio/music/hall_theme.mp3", -33.0)
+	point_music = _looping_player("res://assets/audio/music/point_theme.mp3", -29.0)
+	door_sfx = _sfx_player("res://assets/audio/sfx/door_open.ogg", -20.0)
+	bell_sfx = _sfx_player("res://assets/audio/sfx/shop_bell.wav", -20.0)
 	hall_music.play()
 
 func _looping_player(path: String, volume_db: float) -> AudioStreamPlayer:
@@ -143,11 +160,16 @@ func _process(_delta: float) -> void:
 		_set_location("cafe", Vector2(430, 771))
 	if location == "street":
 		var view_width := get_viewport().get_visible_rect().size.x / camera.zoom.x
-		coffee_street.call("ensure_visible", player.position.x - view_width * 0.5)
+		# The camera's own (possibly limit-clamped) position, not the raw
+		# player position: near CoffeeExterior the view is already pinned
+		# against camera.limit_right, so the sky must stop drifting there
+		# too, in step with the buildings that have visibly stopped.
+		coffee_street.call("ensure_visible", camera.get_screen_center_position().x - view_width * 0.5)
 	if location == "hall":
 		_update_environment()
 	kas.prompt.visible = location == "hall" and not dialogue.active and not book.active and absf(player.position.x - kas.position.x) <= TALK_DISTANCE
 	lina.prompt.visible = location == "hall" and quest_unlocked and not dialogue.active and not book.active and not lina.resolved and absf(player.position.x - lina.position.x) <= TALK_DISTANCE
+	diana.get_node("Prompt").visible = location == "street" and walk_quest_active and not diana_met and not dialogue.active and not book.active and absf(player.position.x - _diana_talk_x()) <= TALK_DISTANCE
 	if location == "hall" and player.position.x >= 2250 and not dialogue.active and not book.active:
 		room_title.reveal()
 
@@ -158,13 +180,36 @@ func _update_environment() -> void:
 	for art in repeating_layers:
 		art.update(camera.get_screen_center_position().x, view_width)
 
+func _connect_hotspot(node_name: String, dialogue_id: String) -> void:
+	var hotspot: Area2D = coffee_interior.get_node(node_name)
+	hotspot.activated.connect(_on_hotspot_clicked.bind(dialogue_id))
+	hotspots.append(hotspot)
+
+func _set_hotspots_enabled(value: bool) -> void:
+	for hotspot in hotspots:
+		hotspot.set_enabled(value)
+
+func _on_hotspot_clicked(dialogue_id: String) -> void:
+	if location == "cafe" and diana_met and not dialogue.active and not book.active and not transitioning:
+		dialogue.start(dialogue_id)
+
+func _diana_talk_x() -> float:
+	# Her Body/CollisionShape2D has been dragged to line up with the artwork
+	# (both offset far from the Diana node's own origin), so that's where
+	# the player actually gets stopped — measure proximity from there.
+	return diana.get_node("Body/CollisionShape2D").global_position.x
+
 func try_talk() -> void:
-	if book.active or location != "hall" or transitioning:
+	if book.active or transitioning or dialogue.active:
 		return
-	if not dialogue.active and absf(player.position.x - kas.position.x) <= TALK_DISTANCE:
-		dialogue.start("kas_return" if dialogue.lina_resolved and not dialogue.followup_completed else "kas")
-	elif quest_unlocked and not dialogue.active and not lina.resolved and absf(player.position.x - lina.position.x) <= TALK_DISTANCE:
-		dialogue.start("lina")
+	if location == "hall":
+		if absf(player.position.x - kas.position.x) <= TALK_DISTANCE:
+			dialogue.start("kas_return" if dialogue.lina_resolved and not dialogue.followup_completed else "kas")
+		elif quest_unlocked and not lina.resolved and absf(player.position.x - lina.position.x) <= TALK_DISTANCE:
+			dialogue.start("lina")
+	elif location == "street":
+		if walk_quest_active and not diana_met and absf(player.position.x - _diana_talk_x()) <= TALK_DISTANCE:
+			dialogue.start("diana")
 
 func _conversation_started() -> void:
 	quest_label.hide()
@@ -184,17 +229,30 @@ func _conversation_started() -> void:
 	mobile_controls.set_gameplay_visible(false)
 	travel_button.hide()
 
+func _refresh_quest_label() -> void:
+	if diana_met:
+		quest_label.text = "Задание: порадовать Точку"
+	elif walk_quest_active:
+		quest_label.text = "Задание: прогуляться"
+	elif dialogue.followup_completed:
+		quest_label.text = "Задание выполнено: вернуться в Точку" if point_visited else "Задание: вернуться в Точку"
+	elif dialogue.lina_resolved:
+		quest_label.text = "Задание: вернуться к Касу"
+		kas.prompt.text = "E — вернуться к Касу"
+
 func _conversation_finished() -> void:
 	player.controls_locked = false
 	kas.set_conversing(false)
 	controls.visible = not mobile_controls.mobile_enabled
 	mobile_controls.set_gameplay_visible(true)
 	quest_label.show()
-	if dialogue.followup_completed:
-		quest_label.text = "Задание выполнено: вернуться в Точку" if point_visited else "Задание: вернуться в Точку"
-	elif dialogue.lina_resolved:
-		quest_label.text = "Задание: вернуться к Касу"
-		kas.prompt.text = "E — вернуться к Касу"
+	if dialogue.conversation_id == "point":
+		walk_quest_active = true
+	elif dialogue.conversation_id == "diana":
+		diana_met = true
+		book.diana_known = true
+		_set_hotspots_enabled(true)
+	_refresh_quest_label()
 	if quest_unlocked:
 		book_hint.text = "J — книга душ" if book_seen else "Новая книга душ · Нажми J, чтобы открыть досье"
 		book_hint.show()
@@ -320,7 +378,7 @@ func travel() -> void:
 		hall_position = player.position
 		first_visit = not point_visited
 		point_visited = true
-		quest_label.text = "Задание выполнено: вернуться в Точку"
+		_refresh_quest_label()
 		_set_location("cafe", coffee_interior.get_node("CoffeeSpawn").position)
 	else:
 		_set_location("hall", hall_position)
@@ -339,6 +397,7 @@ func _set_location(destination: String, spawn: Vector2) -> void:
 	kas.visible = in_hall
 	lina.visible = in_hall
 	kas.get_node("Body/CollisionShape2D").set_deferred("disabled", not in_hall)
+	diana.get_node("Body/CollisionShape2D").set_deferred("disabled", destination != "street")
 	coffee_world.visible = not in_hall
 	coffee_interior.visible = destination == "cafe"
 	coffee_street.visible = destination == "street"

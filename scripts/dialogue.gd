@@ -13,6 +13,7 @@ const PANEL := preload("res://assets/ui/dialogue/dialogue_panel_darkness.png")
 const DARK := preload("res://assets/ui/dialogue/portrait_dark.png")
 const KAS := preload("res://assets/ui/dialogue/portrait_kas.png")
 const LINA := preload("res://assets/ui/dialogue/portrait_lina.png")
+const DIANA := preload("res://assets/ui/dialogue/portrait_diana.png")
 const BLUR := preload("res://shaders/dialogue_blur.gdshader")
 const LETTERS_PER_SECOND := 42.0
 const PAGE_LENGTH := 220
@@ -102,7 +103,9 @@ func _build_interface() -> void:
 	# Draw the portrait first: the frame naturally covers its lower edge.
 	portrait = _make_texture(DARK, Rect2(94, 109, 380, 380))
 	_make_texture(PANEL, Rect2(24, 300, 1232, 410.6667))
-	speaker_label = _make_label(Rect2(169, 471, 940, 29), 21, Color("d9c5a0"))
+	# Stop short of the "К вопросам" button (x=925) so a right-aligned name
+	# (speaker on the right side) doesn't run under it.
+	speaker_label = _make_label(Rect2(169, 471, 740, 29), 21, Color("d9c5a0"))
 	body = RichTextLabel.new()
 	body.position = Vector2(169, 507)
 	body.size = Vector2(940, 122)
@@ -173,17 +176,25 @@ func _paginate(text: String) -> Array[String]:
 
 func _show_line() -> void:
 	choosing = false
-	skip_intro_button.visible = current_topic == "" and pending_outcome == ""
+	# Nothing to skip TO for a one-off bark with no topics menu and no
+	# bespoke handler (unlike kas_return, which jumps straight to the quest
+	# followup) — hide the button rather than let it just close the line early.
+	var skip_goes_somewhere: bool = conversation_id == "kas_return" or not (data.get("topics", []) as Array).is_empty()
+	skip_intro_button.visible = current_topic == "" and pending_outcome == "" and skip_goes_somewhere
 	choices.hide()
 	body.show()
 	var line: Dictionary = lines[line_index]
 	current_speaker = line["speaker"]
-	portrait.visible = current_speaker in ["dark", "kas", "lina"]
-	portrait.texture = DARK if current_speaker == "dark" else LINA if current_speaker == "lina" else KAS
-	var on_right := current_speaker == "dark" if conversation_id.begins_with("kas") else current_speaker == "lina"
+	portrait.visible = current_speaker in ["dark", "kas", "lina", "diana"]
+	portrait.texture = DARK if current_speaker == "dark" else LINA if current_speaker == "lina" else DIANA if current_speaker == "diana" else KAS
+	# Kas and Diana conversations put Dark on the right, facing left (both
+	# stand to Dark's left in the world); Lina puts him on the left instead.
+	var dark_on_right := conversation_id.begins_with("kas") or conversation_id == "diana"
+	var on_right := current_speaker == "dark" if dark_on_right else current_speaker != "dark"
 	portrait.position.x = 806.0 if on_right else 94.0
-	portrait.flip_h = conversation_id.begins_with("kas")
-	speaker_label.text = {"dark": "ДАРК", "kas": "КАС", "lina": "ЛИНА"}.get(current_speaker, "")
+	portrait.flip_h = dark_on_right
+	speaker_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT if on_right else HORIZONTAL_ALIGNMENT_LEFT
+	speaker_label.text = {"dark": "ДАРК", "kas": "КАС", "lina": "ЛИНА", "point": "ТОЧКА", "diana": "ДИАНА"}.get(current_speaker, "")
 	if line.get("effect", "") == "depart":
 		_depart()
 	if line.get("effect", "") == "star":
@@ -214,6 +225,9 @@ func skip_intro() -> void:
 		return
 	if conversation_id == "kas_return":
 		_finish_followup()
+		return
+	if data.get("topics", []).is_empty():
+		close()
 		return
 	_show_choices()
 
@@ -302,7 +316,12 @@ func _show_choices(menu_page := 0) -> void:
 	for topic in topics.slice(menu_page * page_size, (menu_page + 1) * page_size):
 		var topic_id: String = topic["id"]
 		var read_before := visited.has(topic_id)
-		_button(("(прочитано) " if read_before else "") + topic["label"], choose_topic.bind(topic_id), read_before)
+		# topic_6 is the one that actually unlocks Lina's quest — flag it so
+		# it doesn't look like just another lore question.
+		var gives_quest := conversation_id == "kas" and topic_id == "topic_6"
+		# NotoSans (the project font) has no ★ glyph, so a plain asterisk it is.
+		var label: String = ("(прочитано) " if read_before else "") + str(topic["label"]) + (" *" if gives_quest else "")
+		_button(label, choose_topic.bind(topic_id), read_before)
 	if conversation_id == "lina":
 		_button("Вынести решение", _show_verdict)
 	if count > 1:
