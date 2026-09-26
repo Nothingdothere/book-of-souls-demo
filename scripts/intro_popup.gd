@@ -9,7 +9,7 @@ var root_control: Control
 var dim: ColorRect
 var stage: Control
 var content: Control
-var sparkles: CPUParticles2D
+var art_layer: Control
 var appear_sfx: AudioStreamPlayer
 var handwriting: Font
 var stage_base_y := 0.0
@@ -48,6 +48,15 @@ func _build_interface() -> void:
 	content.size = Vector2(1280, 720)
 	content.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	stage.add_child(content)
+	# Dark stands on his own, non-floating layer: only the parchment/text
+	# should bob, and his art runs well past the bottom of the reference
+	# frame (his source image crops at the thigh — better off-screen than
+	# visibly cut off) so it must not ride along with the float offset
+	# applied to `stage` below, or the crop line would bob in and out too.
+	art_layer = Control.new()
+	art_layer.size = Vector2(1280, 720)
+	art_layer.mouse_filter = Control.MOUSE_FILTER_IGNORE
+	root_control.add_child(art_layer)
 
 	var parchment := TextureRect.new()
 	parchment.texture = preload("res://assets/ui/intro/popup_parchment.png")
@@ -62,18 +71,18 @@ func _build_interface() -> void:
 	dark_art.texture = preload("res://assets/ui/intro/dark_intro.png")
 	dark_art.expand_mode = TextureRect.EXPAND_IGNORE_SIZE
 	dark_art.stretch_mode = TextureRect.STRETCH_KEEP_ASPECT
-	dark_art.position = Vector2(690, 30)
-	dark_art.size = Vector2(320, 480)
+	dark_art.position = Vector2(760, 130)
+	dark_art.size = Vector2(430, 645)
 	dark_art.mouse_filter = Control.MOUSE_FILTER_IGNORE
-	content.add_child(dark_art)
+	art_layer.add_child(dark_art)
 
 	var message := Label.new()
 	message.text = MESSAGE
-	message.position = Vector2(300, 190)
-	message.size = Vector2(355, 350)
+	message.position = Vector2(280, 205)
+	message.size = Vector2(340, 305)
 	message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	message.add_theme_font_override("font", handwriting)
-	message.add_theme_font_size_override("font_size", 23)
+	message.add_theme_font_size_override("font_size", 21)
 	message.add_theme_color_override("font_color", Color("34271d"))
 	message.add_theme_constant_override("line_spacing", 3)
 	message.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -81,8 +90,8 @@ func _build_interface() -> void:
 
 	var start_button := Button.new()
 	start_button.text = "Начать"
-	start_button.position = Vector2(390, 550)
-	start_button.size = Vector2(170, 56)
+	start_button.position = Vector2(370, 520)
+	start_button.size = Vector2(170, 45)
 	start_button.flat = true
 	start_button.add_theme_font_override("font", handwriting)
 	start_button.add_theme_font_size_override("font_size", 32)
@@ -91,27 +100,6 @@ func _build_interface() -> void:
 	start_button.pressed.connect(_on_start_pressed)
 	content.add_child(start_button)
 
-	sparkles = CPUParticles2D.new()
-	sparkles.position = Vector2(565, 360)
-	sparkles.emitting = false
-	sparkles.one_shot = true
-	sparkles.amount = 200
-	sparkles.lifetime = 1.1
-	sparkles.explosiveness = 0.75
-	sparkles.direction = Vector2.UP
-	sparkles.spread = 180.0
-	sparkles.gravity = Vector2(0, 40)
-	sparkles.initial_velocity_min = 30.0
-	sparkles.initial_velocity_max = 160.0
-	sparkles.scale_amount_min = 0.15
-	sparkles.scale_amount_max = 0.4
-	sparkles.texture = _sparkle_texture()
-	var ramp := Gradient.new()
-	ramp.set_color(0, Color(1.0, 0.9, 0.55, 1.0))
-	ramp.set_color(1, Color(1.0, 0.85, 0.4, 0.0))
-	sparkles.color_ramp = ramp
-	stage.add_child(sparkles)
-
 	appear_sfx = AudioStreamPlayer.new()
 	appear_sfx.stream = load("res://assets/audio/sfx/book_flip.ogg")
 	add_child(appear_sfx)
@@ -119,19 +107,6 @@ func _build_interface() -> void:
 	get_viewport().size_changed.connect(_layout)
 	_layout()
 	stage_base_y = stage.position.y
-
-func _sparkle_texture() -> GradientTexture2D:
-	var gradient := Gradient.new()
-	gradient.set_color(0, Color(1, 1, 1, 1))
-	gradient.set_color(1, Color(1, 1, 1, 0))
-	var texture := GradientTexture2D.new()
-	texture.gradient = gradient
-	texture.fill = GradientTexture2D.FILL_RADIAL
-	texture.fill_from = Vector2(0.5, 0.5)
-	texture.fill_to = Vector2(1.0, 0.5)
-	texture.width = 16
-	texture.height = 16
-	return texture
 
 func _layout() -> void:
 	var viewport_size := get_viewport().get_visible_rect().size
@@ -150,15 +125,11 @@ func _on_start_pressed() -> void:
 	if dismissing:
 		return
 	dismissing = true
-	sparkles.restart()
-	sparkles.emitting = true
 	var tween := create_tween()
 	tween.set_parallel(true)
-	tween.tween_property(content, "modulate:a", 0.0, 0.7)
-	tween.tween_property(dim, "color:a", 0.0, 0.7)
-	# Let the sparkle burst (1.1s lifetime) finish playing before freeing
-	# this whole node — otherwise it gets cut off right as the fade ends.
-	tween.chain().tween_interval(0.4)
+	tween.tween_property(content, "modulate:a", 0.0, 0.6)
+	tween.tween_property(art_layer, "modulate:a", 0.0, 0.6)
+	tween.tween_property(dim, "color:a", 0.0, 0.6)
 	tween.chain().tween_callback(_finish)
 
 func _finish() -> void:
