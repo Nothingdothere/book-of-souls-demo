@@ -4,6 +4,8 @@ signal dismissed
 
 const MARKER_PATH := "user://intro_seen.marker"
 const MESSAGE := "Игра находится на ранней стадии разработки.\nВсё, что вы увидите сейчас, может измениться: визуальный стиль, диалоги, механики, интерфейс и отдельные элементы истории.\nЭта версия создана, чтобы показать атмосферу, основные идеи и направление проекта.\n\nСпасибо, что заглянули сюда так рано."
+const MESSAGE_FONT_SIZE := 21
+const MESSAGE_MAX_WIDTH := 480.0
 
 var root_control: Control
 var dim: ColorRect
@@ -24,6 +26,40 @@ func _ready() -> void:
 	handwriting = preload("res://assets/fonts/Caveat.ttf")
 	_build_interface()
 	appear_sfx.play()
+
+func _wrap_message(text: String, max_width: float) -> String:
+	var paragraphs := text.split("\n")
+	var wrapped_paragraphs: PackedStringArray = []
+	for paragraph in paragraphs:
+		if paragraph.is_empty():
+			continue
+		wrapped_paragraphs.append(_wrap_paragraph(paragraph, max_width))
+	# Even blank-line gap between every paragraph, matching the reference
+	# layout, regardless of which paragraphs happened to have a blank line
+	# between them in the source text.
+	return "\n\n".join(wrapped_paragraphs)
+
+# Godot's own Label autowrap didn't actually break these long paragraphs at
+# all in-game (they rendered as one line running off the parchment), so
+# lines are pre-broken here using the loaded font's real measured width
+# instead of trusting the Control's autowrap to do it at draw time.
+func _wrap_paragraph(paragraph: String, max_width: float) -> String:
+	if paragraph.is_empty():
+		return ""
+	var words := paragraph.split(" ")
+	var lines: PackedStringArray = []
+	var current := ""
+	for word in words:
+		var candidate: String = word if current.is_empty() else current + " " + word
+		var width: float = handwriting.get_string_size(candidate, HORIZONTAL_ALIGNMENT_LEFT, -1, MESSAGE_FONT_SIZE).x
+		if width > max_width and not current.is_empty():
+			lines.append(current)
+			current = word
+		else:
+			current = candidate
+	if not current.is_empty():
+		lines.append(current)
+	return "\n".join(lines)
 
 func _build_interface() -> void:
 	root_control = Control.new()
@@ -72,12 +108,12 @@ func _build_interface() -> void:
 	art_layer.add_child(dark_art)
 
 	var message := Label.new()
-	message.text = MESSAGE
-	message.position = Vector2(310, 175)
-	message.size = Vector2(500, 280)
-	message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
+	message.text = _wrap_message(MESSAGE, MESSAGE_MAX_WIDTH)
+	message.position = Vector2(320, 175)
+	message.size = Vector2(MESSAGE_MAX_WIDTH, 310)
+	message.autowrap_mode = TextServer.AUTOWRAP_OFF
 	message.add_theme_font_override("font", handwriting)
-	message.add_theme_font_size_override("font_size", 21)
+	message.add_theme_font_size_override("font_size", MESSAGE_FONT_SIZE)
 	message.add_theme_color_override("font_color", Color("34271d"))
 	message.add_theme_constant_override("line_spacing", 3)
 	message.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -85,7 +121,7 @@ func _build_interface() -> void:
 
 	var start_button := Button.new()
 	start_button.text = "Начать"
-	start_button.position = Vector2(460, 480)
+	start_button.position = Vector2(460, 520)
 	start_button.size = Vector2(200, 55)
 	start_button.flat = true
 	start_button.add_theme_font_override("font", handwriting)
