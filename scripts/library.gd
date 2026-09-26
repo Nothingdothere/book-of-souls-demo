@@ -170,10 +170,6 @@ func _setup_intro_popup() -> void:
 	# click "Начать" for.
 	if "--script" in OS.get_cmdline_args():
 		return
-	# Check before building anything: the popup's own _ready() (art, sound,
-	# tweens) would otherwise run for an instant only to be torn down again.
-	if FileAccess.file_exists("user://intro_seen.marker"):
-		return
 	_show_intro_popup()
 
 func _show_intro_popup() -> void:

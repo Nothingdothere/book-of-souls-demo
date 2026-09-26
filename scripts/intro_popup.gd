@@ -2,7 +2,6 @@ extends CanvasLayer
 
 signal dismissed
 
-const MARKER_PATH := "user://intro_seen.marker"
 const MESSAGE := "Игра находится на ранней стадии разработки.\nВсё, что вы увидите сейчас, может измениться: визуальный стиль, диалоги, механики, интерфейс и отдельные элементы истории.\nЭта версия создана, чтобы показать атмосферу, основные идеи и направление проекта.\n\nСпасибо, что заглянули сюда так рано."
 const MESSAGE_FONT_SIZE := 21
 const MESSAGE_MAX_WIDTH := 480.0
@@ -168,8 +167,5 @@ func _on_start_pressed() -> void:
 	tween.chain().tween_callback(_finish)
 
 func _finish() -> void:
-	var marker := FileAccess.open(MARKER_PATH, FileAccess.WRITE)
-	if marker:
-		marker.store_string("1")
 	dismissed.emit()
 	queue_free()
