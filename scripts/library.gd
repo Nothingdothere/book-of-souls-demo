@@ -6,7 +6,6 @@ extends Node2D
 @onready var player: CharacterBody2D = $Player
 @onready var kas: Node2D = $Kas
 @onready var dialogue: CanvasLayer = $Dialogue
-@onready var controls: Label = $Interface/Controls
 const TALK_DISTANCE := 170.0
 const RepeatingArt := preload("res://scripts/repeating_art.gd")
 var repeating_layers: Array = []
@@ -16,7 +15,7 @@ var book: CanvasLayer
 var quest_unlocked := false
 var book_seen := false
 var quest_label: Label
-var book_hint: Label
+var book_icon: TextureButton
 var mobile_controls: CanvasLayer
 var coffee_world: Node2D
 var coffee_interior: Node2D
@@ -62,8 +61,6 @@ func _ready() -> void:
 	mobile_controls.name = "MobileControls"
 	mobile_controls.set_script(preload("res://scripts/mobile_controls.gd"))
 	add_child(mobile_controls)
-	controls.text = "A / D, стрелки — идти     ·     E — поговорить"
-	controls.visible = not mobile_controls.mobile_enabled
 	coffee_world = Node2D.new()
 	coffee_world.name = "PointWorld"
 	add_child(coffee_world)
@@ -88,8 +85,11 @@ func _ready() -> void:
 	_create_quest_toast()
 	quest_label = _hud_label(Vector2(26, 60), 18)
 	quest_label.text = "Задание: поговорить с Касом"
-	book_hint = _hud_label(Vector2(26, 92), 17)
-	book_hint.hide()
+	# A hard gold outline behind the cream fill reads as a soft glow at this
+	# size, keeping the quest line from blending into the plain HUD text.
+	quest_label.add_theme_color_override("font_outline_color", Color(1.0, 0.82, 0.4, 0.65))
+	quest_label.add_theme_constant_override("outline_size", 4)
+	_create_book_icon()
 	lina = Node2D.new()
 	lina.name = "Lina"
 	lina.set_script(preload("res://scripts/lina.gd"))
@@ -239,7 +239,7 @@ func try_talk() -> void:
 
 func _conversation_started() -> void:
 	quest_label.hide()
-	book_hint.hide()
+	book_icon.hide()
 	if dialogue.conversation_id == "lina":
 		book.lina_known = true
 		quest_label.text = "Задание: выслушать Лину и решить её судьбу"
@@ -251,7 +251,6 @@ func _conversation_started() -> void:
 	player.artwork.play("idle")
 	if target == kas:
 		kas.set_conversing(true, player.global_position.x)
-	controls.hide()
 	mobile_controls.set_gameplay_visible(false)
 	travel_button.hide()
 
@@ -269,7 +268,6 @@ func _refresh_quest_label() -> void:
 func _conversation_finished() -> void:
 	player.controls_locked = false
 	kas.set_conversing(false)
-	controls.visible = not mobile_controls.mobile_enabled
 	mobile_controls.set_gameplay_visible(true)
 	quest_label.show()
 	if dialogue.conversation_id == "point":
@@ -280,8 +278,8 @@ func _conversation_finished() -> void:
 		_set_hotspots_enabled(true)
 	_refresh_quest_label()
 	if quest_unlocked:
-		book_hint.text = "J — книга душ" if book_seen else "Новая книга душ · Нажми J, чтобы открыть досье"
-		book_hint.show()
+		book_icon.tooltip_text = "J — книга душ" if book_seen else "Новая книга душ · Нажми J, чтобы открыть досье"
+		book_icon.show()
 	_update_travel_button()
 	if dialogue.followup_completed and not quest_toast_shown:
 		quest_toast_shown = true
@@ -291,6 +289,43 @@ func _conversation_finished() -> void:
 		tween.tween_interval(3.0)
 		tween.tween_property(quest_toast, "modulate:a", 0.0, 0.8)
 		tween.tween_callback(quest_toast.hide)
+
+func _create_book_icon() -> void:
+	book_icon = TextureButton.new()
+	book_icon.name = "BookIcon"
+	book_icon.texture_normal = preload("res://assets/ui/soul_book_icon/soul_book_icon.png")
+	book_icon.ignore_texture_size = true
+	book_icon.stretch_mode = TextureButton.STRETCH_KEEP_ASPECT_CENTERED
+	book_icon.set_anchor(SIDE_TOP, 1.0)
+	book_icon.set_anchor(SIDE_BOTTOM, 1.0)
+	book_icon.offset_left = 26
+	book_icon.offset_right = 86
+	book_icon.offset_top = -96
+	book_icon.offset_bottom = -33
+	book_icon.mouse_default_cursor_shape = Control.CURSOR_POINTING_HAND
+	book_icon.pressed.connect(_toggle_book)
+	$Interface.add_child(book_icon)
+	var fx := Control.new()
+	fx.set_script(preload("res://scripts/hover_sparkles.gd"))
+	fx.glow_enabled = true
+	fx.glow_radius = 16.0
+	fx.sparkle_amount = 6
+	fx.sparkle_velocity_min = 3.0
+	fx.sparkle_velocity_max = 8.0
+	fx.sparkle_scale_min = 0.3
+	fx.sparkle_scale_max = 0.6
+	book_icon.add_child(fx)
+	book_icon.mouse_entered.connect(fx.set_hovering.bind(true))
+	book_icon.mouse_exited.connect(fx.set_hovering.bind(false))
+	book_icon.hide()
+
+func _toggle_book() -> void:
+	if dialogue.active or transitioning or intro_active:
+		return
+	if book.active:
+		book.close()
+	else:
+		book.open()
 
 func _hud_label(at: Vector2, font_size: int) -> Label:
 	var label := Label.new()
@@ -314,19 +349,17 @@ func _book_opened() -> void:
 	player.controls_locked = true
 	player.velocity.x = 0
 	player.artwork.play("idle")
-	controls.hide()
 	mobile_controls.set_gameplay_visible(false)
 	quest_label.hide()
-	book_hint.hide()
+	book_icon.hide()
 	travel_button.hide()
 
 func _book_closed() -> void:
 	player.controls_locked = false
-	controls.visible = not mobile_controls.mobile_enabled
 	mobile_controls.set_gameplay_visible(true)
 	quest_label.show()
-	book_hint.text = "J — книга душ"
-	book_hint.show()
+	book_icon.tooltip_text = "J — книга душ"
+	book_icon.show()
 	_update_travel_button()
 
 func _followup_finished() -> void:
@@ -364,7 +397,7 @@ func _create_travel_button() -> void:
 	$Interface.add_child(travel_button)
 	var fx := Control.new()
 	fx.name = "TravelButtonFx"
-	fx.set_script(preload("res://scripts/travel_button_fx.gd"))
+	fx.set_script(preload("res://scripts/hover_sparkles.gd"))
 	travel_button.add_child(fx)
 	travel_button.mouse_entered.connect(fx.set_hovering.bind(true))
 	travel_button.mouse_exited.connect(fx.set_hovering.bind(false))
@@ -462,7 +495,6 @@ func _set_location(destination: String, spawn: Vector2) -> void:
 	camera.limit_top = 0 if in_hall else -200
 	camera.limit_bottom = 941 if in_hall else 1100
 	camera.reset_smoothing()
-	controls.text = "A / D, стрелки — идти     ·     E — поговорить" if in_hall else "A / D, стрелки — идти"
 	mobile_controls.set_talk_visible(in_hall)
 	hall_music.stream_paused = not in_hall
 	if in_hall:
@@ -475,11 +507,7 @@ func _set_location(destination: String, spawn: Vector2) -> void:
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_J:
-		if not dialogue.active and not transitioning and not intro_active:
-			if book.active:
-				book.close()
-			else:
-				book.open()
+		_toggle_book()
 		get_viewport().set_input_as_handled()
 		return
 	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_E:

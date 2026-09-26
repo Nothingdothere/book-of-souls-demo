@@ -71,7 +71,7 @@ func verify() -> void:
 	await key(KEY_J)
 	check(not b.active and d.active, "Book overlapped dialogue")
 	d.close()
-	check(scene.quest_unlocked and b.unlocked and scene.book_hint.visible, "Quest/book tutorial missing")
+	check(scene.quest_unlocked and b.unlocked and scene.book_icon.visible, "Quest/book icon missing")
 	check(b.page_count() == 3, "Lina revealed early")
 	await key(KEY_J)
 	check(b.active and p.controls_locked and scene.book_seen, "J did not open book")

@@ -102,8 +102,7 @@ func _process(_delta: float) -> void:
 
 func set_mobile_enabled(value: bool) -> void:
 	mobile_enabled = value
-	if is_instance_valid(library) and is_instance_valid(library.controls):
-		library.controls.visible = not value and not library.dialogue.active and not library.book.active
+	if is_instance_valid(library):
 		library._update_travel_button()
 	_update_layout()
 

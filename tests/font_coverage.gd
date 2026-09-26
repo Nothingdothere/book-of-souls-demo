@@ -6,7 +6,7 @@ func _initialize() -> void:
 func verify() -> void:
 	var scene = load("res://scenes/main.tscn").instantiate()
 	root.add_child(scene)
-	var control: Control = scene.get_node("Interface/Controls")
+	var control: Control = scene.quest_label
 	var font := control.get_theme_font("font")
 	print("PROJECT_FONT ", font.resource_path)
 	var failures := 0
@@ -15,9 +15,6 @@ func verify() -> void:
 			print("MISSING_GLYPH ", character)
 			failures += 1
 	if not font.resource_path.ends_with("NotoSans.ttf"):
-		failures += 1
-	if "←" in control.text or "→" in control.text:
-		print("UNSUPPORTED_ARROW_IN_HUD")
 		failures += 1
 	for pair in [
 		["Caveat", load("res://assets/fonts/Caveat.ttf")],
