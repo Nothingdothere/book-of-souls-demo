@@ -1,3 +1,4 @@
 .godot/
 exports/
 *.log
+__pycache__/
