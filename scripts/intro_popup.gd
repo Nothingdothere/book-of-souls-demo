@@ -41,9 +41,6 @@ func _build_interface() -> void:
 	stage.size = Vector2(1280, 720)
 	stage.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	root_control.add_child(stage)
-	# A separate container for the popup art/text: fading this out on dismiss
-	# (rather than the whole stage) leaves the sparkle burst, added straight
-	# to stage below, unaffected so it can linger after the popup is gone.
 	content = Control.new()
 	content.size = Vector2(1280, 720)
 	content.mouse_filter = Control.MOUSE_FILTER_IGNORE
@@ -114,6 +111,10 @@ func _layout() -> void:
 	stage.scale = Vector2.ONE * factor
 	stage.position = Vector2((viewport_size.x - 1280.0 * factor) * 0.5, (viewport_size.y - 720.0 * factor) * 0.5)
 	stage_base_y = stage.position.y
+	# art_layer sits outside stage (so it doesn't float), but still needs the
+	# same viewport-fit transform or Dark won't line up with the parchment.
+	art_layer.scale = stage.scale
+	art_layer.position = stage.position
 
 func _process(delta: float) -> void:
 	if dismissing:
