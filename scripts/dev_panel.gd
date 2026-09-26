@@ -21,7 +21,7 @@ func _ready() -> void:
 	var box := VBoxContainer.new()
 	panel.add_child(box)
 	var title := Label.new()
-	title.text = "Dev: F1 — скрыть/показать"
+	title.text = "Dev: Ё — скрыть/показать"
 	title.add_theme_font_size_override("font_size", 13)
 	title.add_theme_color_override("font_color", Color("b8ac98"))
 	box.add_child(title)
@@ -37,6 +37,9 @@ func _button(box: VBoxContainer, text: String, callback: Callable) -> void:
 	box.add_child(button)
 
 func _unhandled_key_input(event: InputEvent) -> void:
-	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_F1:
+	# Physical keycode, not the layout-translated one: this is the key to the
+	# left of "1" (` / ~ on an English layout, ё / Ё on a Russian one), so it
+	# toggles regardless of which layout is active.
+	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_QUOTELEFT:
 		visible = not visible
 		get_viewport().set_input_as_handled()
