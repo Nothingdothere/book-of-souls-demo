@@ -8,6 +8,7 @@ var active := false
 var turning := false
 var lina_known := false
 var diana_known := false
+var arbiter_known := false
 var page := 0
 var target_page := 0
 var turn_elapsed := 0.0
@@ -142,9 +143,18 @@ func _layout() -> void:
 	stage.position = (size - Vector2(1536, 1024) * factor) * 0.5
 
 func page_count() -> int:
-	if diana_known:
-		return 5
-	return 4 if lina_known else 3
+	return _available_entries().size()
+
+func _available_entries() -> Array:
+	# Optional dossiers unlock independently: learning about the Arbiter
+	# must not expose Lina or Diana before their own encounters.
+	return entries.filter(func(entry):
+		match entry["id"]:
+			"lina": return lina_known
+			"diana": return diana_known
+			"arbiter": return arbiter_known
+		return true
+	)
 
 func open() -> void:
 	if not unlocked or active:
@@ -166,7 +176,9 @@ func close() -> void:
 	closed.emit()
 
 func _show_page() -> void:
-	var entry: Dictionary = entries[page]
+	var available := _available_entries()
+	page = clampi(page, 0, available.size() - 1)
+	var entry: Dictionary = available[page]
 	photo.texture = load("res://assets/ui/book/%s.png" % entry["id"])
 	heading.text = entry["name"]
 	classification.text = entry["type"]

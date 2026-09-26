@@ -25,9 +25,10 @@ func _ready() -> void:
 	title.add_theme_font_size_override("font_size", 13)
 	title.add_theme_color_override("font_color", Color("b8ac98"))
 	box.add_child(title)
-	_button(box, "Зал распределения", func(): library._set_location("hall", library.hall_position))
-	_button(box, "Кофейня «Точка»", func(): library._set_location("cafe", library.coffee_interior.get_node("CoffeeSpawn").position))
-	_button(box, "Улица", func(): library._set_location("street", library.coffee_street.get_node("PlayerSpawn").position))
+	_button(box, "Зал распределения", func(): library.transition_to("hall", library.hall_position))
+	_button(box, "Точка", func(): library.transition_to("cafe", library.coffee_interior.get_node("CoffeeSpawn").position))
+	_button(box, "Улица", func(): library.transition_to("street", library.coffee_street.get_node("PlayerSpawn").position))
+	_button(box, "Та-сторона", func(): library.transition_to("other_side", library.other_side.get_node("PlayerSpawn").position))
 
 func _button(box: VBoxContainer, text: String, callback: Callable) -> void:
 	var button := Button.new()

@@ -1,6 +1,11 @@
 extends Node2D
 
 @export_range(0.5, 1.0, 0.01) var gameplay_zoom := 0.75
+@onready var original_interior: Texture2D = $CounterAndShelves.texture
+
+func set_repaired(value: bool) -> void:
+	$CounterAndShelves.texture = preload("res://assets/coffee/cafe_repaired.png") if value else original_interior
+	$HotspotWall.visible = not value
 
 
 func _ready() -> void:

@@ -14,6 +14,7 @@ const DARK := preload("res://assets/ui/dialogue/portrait_dark.png")
 const KAS := preload("res://assets/ui/dialogue/portrait_kas.png")
 const LINA := preload("res://assets/ui/dialogue/portrait_lina.png")
 const DIANA := preload("res://assets/ui/dialogue/portrait_diana.png")
+const FATE := preload("res://assets/ui/dialogue/portrait_fate.png")
 const BLUR := preload("res://shaders/dialogue_blur.gdshader")
 const LETTERS_PER_SECOND := 42.0
 const PAGE_LENGTH := 220
@@ -45,6 +46,7 @@ var lina_available := false
 var departed := false
 var awarded := false
 var followup_completed := false
+var conversation_completed := false
 
 func _ready() -> void:
 	layer = 20
@@ -114,6 +116,9 @@ func _build_interface() -> void:
 	body.add_theme_constant_override("line_separation", 3)
 	body.scroll_active = false
 	body.bbcode_enabled = false
+	# Lay out the complete page before revealing letters, so right-aligned
+	# lines keep their final position throughout the typewriter effect.
+	body.visible_characters_behavior = TextServer.VC_CHARS_AFTER_SHAPING
 	body.mouse_filter = Control.MOUSE_FILTER_IGNORE
 	stage.add_child(body)
 	hint = _make_label(Rect2(169, 651, 940, 25), 14, Color("b8ac98"))
@@ -153,6 +158,7 @@ func start(character := "kas") -> void:
 	visited = histories.get(character, {})
 	data = JSON.parse_string(FileAccess.get_file_as_string("res://dialogue/%s_intro.json" % character))
 	pending_outcome = ""
+	conversation_completed = false
 	active = true
 	choosing = false
 	current_topic = ""
@@ -185,8 +191,9 @@ func _show_line() -> void:
 	body.show()
 	var line: Dictionary = lines[line_index]
 	current_speaker = line["speaker"]
-	portrait.visible = current_speaker in ["dark", "kas", "lina", "diana"]
-	portrait.texture = DARK if current_speaker == "dark" else LINA if current_speaker == "lina" else DIANA if current_speaker == "diana" else KAS
+	var portraits := {"dark": DARK, "kas": KAS, "lina": LINA, "diana": DIANA, "fate": FATE}
+	portrait.visible = portraits.has(current_speaker)
+	portrait.texture = portraits.get(current_speaker, KAS)
 	# Kas and Diana conversations put Dark on the right, facing left (both
 	# stand to Dark's left in the world); Lina puts him on the left instead.
 	var dark_on_right := conversation_id.begins_with("kas") or conversation_id == "diana"
@@ -194,7 +201,8 @@ func _show_line() -> void:
 	portrait.position.x = 806.0 if on_right else 94.0
 	portrait.flip_h = dark_on_right
 	speaker_label.horizontal_alignment = HORIZONTAL_ALIGNMENT_RIGHT if on_right else HORIZONTAL_ALIGNMENT_LEFT
-	speaker_label.text = {"dark": "ДАРК", "kas": "КАС", "lina": "ЛИНА", "point": "ТОЧКА", "diana": "ДИАНА"}.get(current_speaker, "")
+	body.horizontal_alignment = speaker_label.horizontal_alignment if not current_speaker.is_empty() else HORIZONTAL_ALIGNMENT_LEFT
+	speaker_label.text = {"dark": "ДАРК", "kas": "КАС", "lina": "ЛИНА", "point": "ТОЧКА", "diana": "ДИАНА", "fate": "СУДЬБА"}.get(current_speaker, "")
 	if line.get("effect", "") == "depart":
 		_depart()
 	if line.get("effect", "") == "star":
@@ -254,6 +262,7 @@ func advance() -> void:
 			visited[current_topic] = true
 			topic_finished.emit(conversation_id, current_topic)
 		if data.get("topics", []).is_empty():
+			conversation_completed = true
 			close()
 			return
 		_show_choices()

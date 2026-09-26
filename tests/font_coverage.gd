@@ -6,7 +6,10 @@ func _initialize() -> void:
 func verify() -> void:
 	var scene = load("res://scenes/main.tscn").instantiate()
 	root.add_child(scene)
-	var control: Control = scene.quest_label
+	# A plain, un-styled Label to read the project's inherited default theme
+	# font from — quest_label now carries its own italic FontVariation.
+	var control := Label.new()
+	scene.add_child(control)
 	var font := control.get_theme_font("font")
 	print("PROJECT_FONT ", font.resource_path)
 	var failures := 0

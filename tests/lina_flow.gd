@@ -31,7 +31,7 @@ func verify() -> void:
 		p.position.x = 2950
 		await physics_frame
 		await process_frame
-		check(scene.room_title.shown, "Reading room title not triggered")
+		check(scene.room_title.shown_titles.has("Читальный зал"), "Reading room title not triggered")
 		scene.try_talk()
 		check(d.active and d.conversation_id == "lina" and p.controls_locked, "Lina interaction failed")
 		check(not d.portrait.visible, "Narration has portrait")

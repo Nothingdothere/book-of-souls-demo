@@ -1,0 +1,28 @@
+[gd_scene load_steps=3 format=3]
+
+[ext_resource type="SpriteFrames" path="res://assets/npc/fate/fate_frames.tres" id="1"]
+
+[sub_resource type="RectangleShape2D" id="BodyShape"]
+size = Vector2(96, 300)
+
+[node name="Fate" type="Node2D"]
+editor_description = "Судьба появляется после исчезновения Лины. При первом приближении Дарка начинается короткий диалог."
+
+[node name="ContactShadow" type="Polygon2D" parent="."]
+position = Vector2(0, -1)
+color = Color(0.04, 0.035, 0.025, 0.16)
+polygon = PackedVector2Array(-55, 0, -38, -4, 0, -6, 38, -4, 55, 0, 38, 4, 0, 6, -38, 4)
+
+[node name="Artwork" type="AnimatedSprite2D" parent="."]
+position = Vector2(0, -202.86)
+scale = Vector2(0.63, 0.63)
+sprite_frames = ExtResource("1")
+animation = &"idle"
+autoplay = "idle"
+
+[node name="Body" type="StaticBody2D" parent="."]
+
+[node name="CollisionShape2D" type="CollisionShape2D" parent="Body"]
+position = Vector2(0, -150)
+shape = SubResource("BodyShape")
+disabled = true

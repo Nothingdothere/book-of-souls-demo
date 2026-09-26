@@ -1,0 +1,48 @@
+[gd_scene format=3 uid="uid://hc2ece1wi7bi"]
+
+[ext_resource type="Script" uid="uid://de33thk6n1ecr" path="res://scripts/other_side.gd" id="1"]
+[ext_resource type="Texture2D" uid="uid://d4elmbftgcraa" path="res://assets/other_side/background.png" id="2"]
+[ext_resource type="Texture2D" uid="uid://cvu1lie8fs6uy" path="res://assets/other_side/midground.png" id="3"]
+[ext_resource type="Texture2D" uid="uid://bgw6fc1upnj2v" path="res://assets/other_side/ground_surface.png" id="4"]
+[ext_resource type="Texture2D" uid="uid://bsmth2sks6lk2" path="res://assets/other_side/foreground.png" id="5"]
+[ext_resource type="Texture2D" uid="uid://c8cgmxwee3t6k" path="res://assets/character/dark_idle_right_01.png" id="6"]
+
+[node name="OtherSide" type="Node2D" unique_id=1481489420]
+script = ExtResource("1")
+
+[node name="Background" type="Sprite2D" parent="." unique_id=892005827]
+z_index = -15
+position = Vector2(0, -80)
+scale = Vector2(1.3, 1.1)
+texture = ExtResource("2")
+centered = false
+
+[node name="Midground" type="Sprite2D" parent="." unique_id=890451444]
+z_index = -10
+position = Vector2(-46, -93)
+scale = Vector2(1.0294659, 1.2403315)
+texture = ExtResource("3")
+centered = false
+
+[node name="GroundArt" type="Sprite2D" parent="." unique_id=2008171886]
+z_index = -5
+position = Vector2(0, 580)
+texture = ExtResource("4")
+centered = false
+
+[node name="Foreground" type="Sprite2D" parent="." unique_id=862324320]
+z_index = 5
+position = Vector2(0, 218)
+scale = Vector2(1.0605469, 1)
+texture = ExtResource("5")
+centered = false
+
+[node name="PlayerSpawn" type="Marker2D" parent="." unique_id=1693710148]
+editor_description = "Место появления Дарка на Та-стороне. DarkPreview задаёт его масштаб и визуальное смещение."
+position = Vector2(1086, 771)
+
+[node name="DarkPreview" type="Sprite2D" parent="PlayerSpawn" unique_id=2063674088]
+position = Vector2(-60, 50)
+scale = Vector2(0.285, 0.285)
+texture = ExtResource("6")
+offset = Vector2(-38, -711)

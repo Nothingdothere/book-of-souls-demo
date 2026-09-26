@@ -9,6 +9,7 @@
 [ext_resource type="Texture2D" uid="uid://cc1ebjvt5jxl5" path="res://assets/foreground/03_ground.png" id="7"]
 [ext_resource type="PackedScene" path="res://scenes/kas.tscn" id="8"]
 [ext_resource type="PackedScene" path="res://scenes/dialogue.tscn" id="9"]
+[ext_resource type="PackedScene" path="res://scenes/fate.tscn" id="10"]
 
 [sub_resource type="RectangleShape2D" id="FloorShape"]
 size = Vector2(1896, 200)
@@ -51,6 +52,9 @@ position = Vector2(687, 771)
 
 [node name="Kas" parent="." unique_id=528047845 instance=ExtResource("8")]
 position = Vector2(254, 731)
+
+[node name="Fate" parent="." instance=ExtResource("10")]
+position = Vector2(4100, 756)
 
 [node name="ForegroundArt" type="Node2D" parent="." unique_id=1327142070]
 z_index = 5
