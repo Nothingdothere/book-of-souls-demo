@@ -31,6 +31,7 @@ var diana_met := false
 var diana: Node2D
 var hotspots: Array = []
 var transitioning := false
+var intro_active := false
 var quest_toast: Label
 var quest_toast_shown := false
 var hall_music: AudioStreamPlayer
@@ -122,10 +123,35 @@ func _ready() -> void:
 	repeating_layers.append(RepeatingArt.new(tables))
 	_update_environment()
 	_setup_audio()
+	_setup_intro_popup()
 	if OS.is_debug_build():
 		var dev_panel := CanvasLayer.new()
 		dev_panel.set_script(preload("res://scripts/dev_panel.gd"))
 		add_child(dev_panel)
+
+func _setup_intro_popup() -> void:
+	# Test scripts run this same scene via `--script tests/xyz.gd` rather
+	# than a real boot; skip the blocking popup there or every movement/
+	# interaction test would freeze at controls_locked with nothing to
+	# click "Начать" for.
+	if "--script" in OS.get_cmdline_args():
+		return
+	# Check before building anything: the popup's own _ready() (art, sound,
+	# tweens) would otherwise run for an instant only to be torn down again.
+	if FileAccess.file_exists("user://intro_seen.marker"):
+		return
+	_show_intro_popup()
+
+func _show_intro_popup() -> void:
+	var popup := CanvasLayer.new()
+	popup.set_script(preload("res://scripts/intro_popup.gd"))
+	intro_active = true
+	player.controls_locked = true
+	popup.dismissed.connect(func():
+		intro_active = false
+		player.controls_locked = false
+	)
+	add_child(popup)
 
 func _setup_audio() -> void:
 	hall_music = _looping_player("res://assets/audio/music/hall_theme.mp3", -33.0)
@@ -200,7 +226,7 @@ func _diana_talk_x() -> float:
 	return diana.get_node("Body/CollisionShape2D").global_position.x
 
 func try_talk() -> void:
-	if book.active or transitioning or dialogue.active:
+	if book.active or transitioning or dialogue.active or intro_active:
 		return
 	if location == "hall":
 		if absf(player.position.x - kas.position.x) <= TALK_DISTANCE:
@@ -434,7 +460,7 @@ func _set_location(destination: String, spawn: Vector2) -> void:
 
 func _unhandled_key_input(event: InputEvent) -> void:
 	if event is InputEventKey and event.pressed and not event.echo and event.physical_keycode == KEY_J:
-		if not dialogue.active and not transitioning:
+		if not dialogue.active and not transitioning and not intro_active:
 			if book.active:
 				book.close()
 			else:
