@@ -18,12 +18,10 @@ var dismissing := false
 
 func _ready() -> void:
 	layer = 100
-	if OS.has_feature("web"):
-		handwriting = preload("res://assets/fonts/Caveat.ttf")
-	else:
-		var system_font := SystemFont.new()
-		system_font.font_names = PackedStringArray(["Segoe Script", "Gabriola"])
-		handwriting = system_font
+	# Bundled font on every platform: an OS-substituted SystemFont renders at
+	# wildly different widths depending on what happens to be installed,
+	# which is what overflowed the parchment on desktop.
+	handwriting = preload("res://assets/fonts/Caveat.ttf")
 	_build_interface()
 	appear_sfx.play()
 
@@ -75,8 +73,8 @@ func _build_interface() -> void:
 
 	var message := Label.new()
 	message.text = MESSAGE
-	message.position = Vector2(280, 205)
-	message.size = Vector2(340, 305)
+	message.position = Vector2(310, 175)
+	message.size = Vector2(500, 280)
 	message.autowrap_mode = TextServer.AUTOWRAP_WORD_SMART
 	message.add_theme_font_override("font", handwriting)
 	message.add_theme_font_size_override("font_size", 21)
@@ -87,8 +85,8 @@ func _build_interface() -> void:
 
 	var start_button := Button.new()
 	start_button.text = "Начать"
-	start_button.position = Vector2(370, 520)
-	start_button.size = Vector2(170, 45)
+	start_button.position = Vector2(460, 480)
+	start_button.size = Vector2(200, 55)
 	start_button.flat = true
 	start_button.add_theme_font_override("font", handwriting)
 	start_button.add_theme_font_size_override("font_size", 32)
