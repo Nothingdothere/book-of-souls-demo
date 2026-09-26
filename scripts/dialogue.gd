@@ -392,6 +392,10 @@ func close() -> void:
 func _unhandled_input(event: InputEvent) -> void:
 	if not active:
 		return
+	# Touch also generates a mouse event for GUI buttons. The dialogue
+	# handles the original touch, so don't advance a second time here.
+	if event is InputEventMouseButton and event.device == InputEvent.DEVICE_ID_EMULATION:
+		return
 	if event is InputEventKey and event.pressed and not event.echo:
 		if event.keycode == KEY_ESCAPE:
 			close()

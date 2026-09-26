@@ -783,7 +783,7 @@ func _set_location(destination: String, spawn: Vector2) -> void:
 	camera.limit_top = 0 if in_hall else -200
 	camera.limit_bottom = 941 if in_hall else 1100
 	camera.reset_smoothing()
-	mobile_controls.set_talk_visible(in_hall)
+	mobile_controls.set_talk_visible(destination in ["hall", "street"])
 	var selected_music: AudioStreamPlayer = hall_music if in_hall else other_side_music if destination == "other_side" else point_music
 	for music in [hall_music, point_music, other_side_music]:
 		if music == selected_music:
