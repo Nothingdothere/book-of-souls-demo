@@ -341,18 +341,33 @@ func _create_travel_button() -> void:
 	travel_button.set_anchor(SIDE_RIGHT, 1.0)
 	travel_button.add_theme_font_size_override("font_size", 16)
 	travel_button.add_theme_color_override("font_color", Color("f4e5c3"))
-	var style := StyleBoxFlat.new()
-	style.bg_color = Color(0.07, 0.055, 0.08, 0.89)
-	style.border_color = Color("c6a875")
-	style.set_border_width_all(2)
-	style.set_corner_radius_all(11)
-	travel_button.add_theme_stylebox_override("normal", style)
-	var hover := style.duplicate() as StyleBoxFlat
-	hover.bg_color = Color(0.26, 0.18, 0.15, 0.96)
-	travel_button.add_theme_stylebox_override("hover", hover)
-	travel_button.add_theme_stylebox_override("pressed", hover)
+	travel_button.add_theme_color_override("font_hover_color", Color("fff2d2"))
+	# Texture margins protect the moon medallions in each corner from
+	# stretching; only the plain strip between them stretches to fit
+	# whatever length the button's text needs.
+	var normal_style := StyleBoxTexture.new()
+	normal_style.texture = preload("res://assets/ui/travel_button/travel_button_normal.png")
+	normal_style.texture_margin_left = 81
+	normal_style.texture_margin_right = 81
+	normal_style.texture_margin_top = 16
+	normal_style.texture_margin_bottom = 16
+	travel_button.add_theme_stylebox_override("normal", normal_style)
+	var hover_style := StyleBoxTexture.new()
+	hover_style.texture = preload("res://assets/ui/travel_button/travel_button_hover.png")
+	hover_style.texture_margin_left = 81
+	hover_style.texture_margin_right = 81
+	hover_style.texture_margin_top = 16
+	hover_style.texture_margin_bottom = 16
+	travel_button.add_theme_stylebox_override("hover", hover_style)
+	travel_button.add_theme_stylebox_override("pressed", hover_style)
 	travel_button.pressed.connect(travel)
 	$Interface.add_child(travel_button)
+	var fx := Control.new()
+	fx.name = "TravelButtonFx"
+	fx.set_script(preload("res://scripts/travel_button_fx.gd"))
+	travel_button.add_child(fx)
+	travel_button.mouse_entered.connect(fx.set_hovering.bind(true))
+	travel_button.mouse_exited.connect(fx.set_hovering.bind(false))
 	_update_travel_button()
 
 func _create_quest_toast() -> void:
